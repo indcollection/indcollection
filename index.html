@@ -79,9 +79,27 @@
         .price-choice:checked + label { border-color:#7B1113; background:#FDFBF7; box-shadow: inset 3px 0 0 #7B1113; }
         .mini-badge { font-size:9px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
         .sticky-estimate { position:sticky; top:1rem; }
+
+        /* V5.2 - unified process feedback */
+        .ic-spinner { width: 38px; height: 38px; border: 3px solid rgba(212,175,55,.25); border-top-color:#D4AF37; border-radius:50%; animation: icSpin .75s linear infinite; }
+        @keyframes icSpin { to { transform: rotate(360deg); } }
+        .ic-progress-track { width:100%; height:3px; background:rgba(255,255,255,.12); overflow:hidden; }
+        .ic-progress-bar { height:100%; width:8%; background:#D4AF37; transition:width .25s ease; }
+        .ic-category-chip input:checked + span { background:#7B1113; color:white; border-color:#7B1113; }
     </style>
 </head>
 <body class="antialiased flex flex-col min-h-screen">
+    <!-- PROCESS LOADER V5.2 -->
+    <div id="ic-loader" class="hide fixed inset-0 z-[100] bg-dark/80 backdrop-blur-sm flex items-center justify-center p-5">
+        <div class="w-full max-w-sm bg-dark border border-gold/30 shadow-2xl p-6 text-center">
+            <div class="ic-spinner mx-auto mb-4"></div>
+            <div id="ic-loader-title" class="font-serif text-gold text-lg">Memproses...</div>
+            <div id="ic-loader-detail" class="text-gray-400 text-[11px] mt-2 min-h-[32px] leading-relaxed">Mohon tunggu.</div>
+            <div class="ic-progress-track mt-5"><div id="ic-loader-bar" class="ic-progress-bar"></div></div>
+            <div id="ic-loader-percent" class="text-[9px] text-gray-500 mt-2 tracking-widest">0%</div>
+        </div>
+    </div>
+
 
     <!-- Top Bar: Waktu Real-time -->
     <div class="bg-primaryDark text-goldLight text-xs tracking-widest py-2 px-4 flex justify-between items-center border-b border-gold/30">
@@ -418,8 +436,20 @@
                     <div class="grid grid-cols-2 gap-5 mb-6">
                         <div class="col-span-2"><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Nama Kebaya / Dress *</label><input type="text" id="manage-name" class="w-full border-b border-gray-300 px-2 py-2 outline-none bg-transparent" required></div>
                         <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Kode Inventaris</label><input type="text" id="manage-inventory-code" class="w-full border-b border-gray-300 px-2 py-2 outline-none bg-transparent" placeholder="Contoh: KBY-WSD-001"></div>
-                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Kategori *</label><select id="manage-category" class="w-full border-b border-gray-300 px-2 py-2 bg-transparent text-sm" required><option value="wisuda">Kebaya Wisuda</option><option value="pengantin">Kebaya Pengantin</option><option value="kutubaru">Kutubaru</option><option value="dress">Gaun / Dress Modern</option></select></div>
-                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Ukuran</label><input type="text" id="manage-size" class="w-full border-b border-gray-300 px-2 py-2" placeholder="S / M / L / XL / Custom"></div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Kategori Sewa *</label>
+                            <input type="hidden" id="manage-category">
+                            <div class="flex flex-wrap gap-2">
+                                <label class="ic-category-chip cursor-pointer"><input id="manage-cat-all" type="checkbox" class="hidden" onchange="toggleAllRentCategories(this.checked)"><span class="inline-block border border-gray-300 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition">Semua</span></label>
+                                <label class="ic-category-chip cursor-pointer"><input type="checkbox" class="hidden manage-cat-option" value="wisuda" onchange="syncRentCategories()"><span class="inline-block border border-gray-300 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition">Wisuda</span></label>
+                                <label class="ic-category-chip cursor-pointer"><input type="checkbox" class="hidden manage-cat-option" value="pengantin" onchange="syncRentCategories()"><span class="inline-block border border-gray-300 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition">Pengantin</span></label>
+                                <label class="ic-category-chip cursor-pointer"><input type="checkbox" class="hidden manage-cat-option" value="kutubaru" onchange="syncRentCategories()"><span class="inline-block border border-gray-300 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition">Kutubaru</span></label>
+                                <label class="ic-category-chip cursor-pointer"><input type="checkbox" class="hidden manage-cat-option" value="dress" onchange="syncRentCategories()"><span class="inline-block border border-gray-300 px-3 py-2 text-[10px] uppercase tracking-wider font-bold transition">Dress</span></label>
+                            </div>
+                            <p class="text-[9px] text-gray-400 mt-2">Satu baju dapat ditandai pada beberapa kategori. Pilih “Semua” untuk menandai seluruh kategori.</p>
+                        </div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Lingkar Dada (cm)</label><input type="number" step="0.1" min="0" id="manage-chest-cm" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Contoh: 92"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Panjang Baju (cm)</label><input type="number" step="0.1" min="0" id="manage-length-cm" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Contoh: 135"></div>
                         <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Warna</label><input type="text" id="manage-color" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Ruby / Gold / White"></div>
                         <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Lokasi Penyimpanan</label><input type="text" id="manage-location" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Rak A1 / Lemari 2"></div>
                         <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Kondisi</label><select id="manage-condition" class="w-full border-b border-gray-300 px-2 py-2"><option>Baik</option><option>Perlu Perawatan</option><option>Maintenance</option><option>Rusak</option></select></div>
@@ -727,19 +757,19 @@
 
     <script>
 // ================================================================
-// INDCOLLECTION - FUNCTIONAL ENGINE V5.1
-// Tampilan publik tetap mengikuti desain awal. V5.1 hanya menambah mesin:
+// INDCOLLECTION - FUNCTIONAL ENGINE V5.2
+// Tampilan publik tetap mengikuti desain awal. V5.2 hanya menambah mesin:
 // Sheet DB, Drive upload, booking, promo, pembayaran, history, calendar,
 // reminder, denda keterlambatan, PDF + QR, dan admin CRUD.
 // ================================================================
 
 // Endpoint sudah dipasangkan untuk deployment IndCollection.
-const API_URL = 'https://script.google.com/macros/s/AKfycbxme5rKjRkIRVKY6_cpSBfi7EncZLer1r5-ucpuC34jpjppxbU5P4dtKheM3cl7KCZC/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzhxVg7kXdlsZK-MyLdrJzWczTVW-SPAcj4cSqkiqDU7ddkwd7d4TVQvrdebAzwfCE/exec';
 const STORE_WA = '6281220007780';
 const API_READY = () => API_URL && !API_URL.includes('PASTE_GOOGLE');
 const LS_KEY = 'indcollection_v4_public_cache';
 const LS_LOCAL_ORDERS = 'indcollection_v4_local_orders';
-const TOKEN_KEY = 'ic_session_v51';
+const TOKEN_KEY = 'ic_session_v52';
 
 const DEFAULT_PRODUCTS = [
     { id:'KB001', name:'Kebaya Wisuda Modern Ruby', category:'wisuda', price:175000, comparePrice:0, deposit:100000, cleaningFee:0, available:true, inventoryCode:'INV-RUBY-01', size:'M/L', color:'Ruby', location:'Rak A1', condition:'Baik', lateFeePerDay:50000, description:'', images:[
@@ -827,6 +857,32 @@ function localISODate(d=new Date()){ return `${d.getFullYear()}-${String(d.getMo
 function dateID(s) { const d=parseDateLocal(s); return d ? d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '-'; }
 function dateShortID(s){ const d=parseDateLocal(s); return d ? d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}) : '-'; }
 function addDaysISO(s,days){ const d=parseDateLocal(s); if(!d)return''; d.setDate(d.getDate()+days); return localISODate(d); }
+function showProcessLoader(title='Memproses...',detail='Mohon tunggu.',percent=8){
+    const box=document.getElementById('ic-loader');if(!box)return;
+    document.getElementById('ic-loader-title').textContent=title;
+    document.getElementById('ic-loader-detail').textContent=detail;
+    setProcessProgress(percent);box.classList.remove('hide');document.body.style.overflow='hidden';
+}
+function updateProcessLoader(title,detail,percent){
+    if(title)document.getElementById('ic-loader-title').textContent=title;
+    if(detail!==undefined)document.getElementById('ic-loader-detail').textContent=detail;
+    if(percent!==undefined)setProcessProgress(percent);
+}
+function setProcessProgress(percent){const p=Math.max(0,Math.min(100,Number(percent)||0));const b=document.getElementById('ic-loader-bar'),t=document.getElementById('ic-loader-percent');if(b)b.style.width=p+'%';if(t)t.textContent=Math.round(p)+'%';}
+function hideProcessLoader(){const box=document.getElementById('ic-loader');if(box)box.classList.add('hide');document.body.style.overflow='auto';}
+function productCategories(item){return String(item?.category||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);}
+function categoryLabel(value){const map={wisuda:'Wisuda',pengantin:'Pengantin',kutubaru:'Kutubaru',dress:'Dress'};return String(value||'').split(',').map(x=>map[x.trim().toLowerCase()]||x.trim()).filter(Boolean).join(' · ');}
+function syncRentCategories(){
+    const opts=[...document.querySelectorAll('.manage-cat-option')],selected=opts.filter(x=>x.checked).map(x=>x.value);
+    const hidden=document.getElementById('manage-category');if(hidden)hidden.value=selected.join(',');
+    const all=document.getElementById('manage-cat-all');if(all)all.checked=opts.length>0&&selected.length===opts.length;
+}
+function toggleAllRentCategories(checked){document.querySelectorAll('.manage-cat-option').forEach(x=>x.checked=checked);syncRentCategories();}
+function setRentCategories(value){
+    const wanted=String(value||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
+    document.querySelectorAll('.manage-cat-option').forEach(x=>x.checked=wanted.includes(x.value));
+    syncRentCategories();
+}
 function nowISODate(){ return localISODate(new Date()); }
 function makeLocalId(prefix){ const d=new Date(); return `${prefix}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(Date.now()).slice(-6)}`; }
 function getToken(){ return sessionStorage.getItem(TOKEN_KEY)||''; }
@@ -835,15 +891,26 @@ function loadPublicCache(){ try { return JSON.parse(localStorage.getItem(LS_KEY)
 function saveLocalOrders(){ if(!API_READY()) localStorage.setItem(LS_LOCAL_ORDERS,JSON.stringify(orderData)); }
 function loadLocalOrders(){ try{return JSON.parse(localStorage.getItem(LS_LOCAL_ORDERS)||'[]');}catch(e){return[];} }
 
-async function api(action, data={}, protectedAction=false){
+async function api(action, data={}, protectedAction=false, timeoutMs=45000, silent=false){
     if(!API_READY()) throw new Error('API_NOT_CONFIGURED');
-    const payload = {action, data, token: protectedAction ? getToken() : ''};
-    const body = new URLSearchParams({payload:JSON.stringify(payload)});
-    const res = await fetch(API_URL,{method:'POST',body,redirect:'follow'});
-    if(!res.ok) throw new Error('HTTP_'+res.status);
-    const out = await res.json();
-    if(!out.ok) throw new Error(out.error || 'API_ERROR');
-    return out;
+    const loader=document.getElementById('ic-loader'),alreadyBusy=loader&&!loader.classList.contains('hide');
+    const labels={createOrder:'Menyimpan Booking',updateOrder:'Memperbarui Pesanan',addPayment:'Menyimpan Pembayaran',upsertProduct:'Menyimpan Katalog',deleteProduct:'Menghapus Katalog',upsertPromo:'Menyimpan Promo',deletePromo:'Menghapus Promo',createBespoke:'Mengirim Bespoke',updateBespoke:'Memperbarui Bespoke',upsertBespokePrice:'Menyimpan Harga',deleteBespokePrice:'Menghapus Harga',uploadFile:'Mengunggah File',refreshReminders:'Memperbarui Reminder',markReminderSent:'Memperbarui Reminder',customerHistory:'Memuat Riwayat',adminData:'Sinkronisasi Data'};
+    if(!silent && !alreadyBusy && action!=='bootstrap' && action!=='session')showProcessLoader(labels[action]||'Memproses','Menghubungkan ke sistem IndCollection...',18);
+    const payload={action,data,token:protectedAction?getToken():''};
+    const body=new URLSearchParams({payload:JSON.stringify(payload)});
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+        const res=await fetch(API_URL,{method:'POST',body,redirect:'follow',signal:controller.signal});
+        if(!res.ok)throw new Error('HTTP_'+res.status);
+        const text=await res.text();let out;try{out=JSON.parse(text);}catch(e){throw new Error('RESPON_API_TIDAK_VALID');}
+        if(!out.ok)throw new Error(out.error||'API_ERROR');
+        if(!silent && !alreadyBusy && action!=='bootstrap' && action!=='session'){updateProcessLoader('Selesai','Perubahan berhasil diproses.',100);await new Promise(r=>setTimeout(r,100));}
+        return out;
+    }catch(err){
+        if(err.name==='AbortError')throw new Error('KONEKSI_TIMEOUT');
+        if(String(err.message).includes('Failed to fetch'))throw new Error('KONEKSI_GAGAL');
+        throw err;
+    }finally{clearTimeout(timer);if(!silent && !alreadyBusy && action!=='bootstrap' && action!=='session')hideProcessLoader();}
 }
 
 async function bootstrap(){
@@ -882,7 +949,7 @@ function isPromoActive(p, product, voucher=''){
     const today=nowISODate(); if(p.startDate && today<p.startDate) return false; if(p.endDate && today>p.endDate) return false;
     const code=(p.code||'').trim().toUpperCase();
     if(code && code !== String(voucher||'').trim().toUpperCase()) return false;
-    if(p.scope==='category' && String(p.target||'').toLowerCase()!==String(product.category||'').toLowerCase()) return false;
+    if(p.scope==='category' && !productCategories(product).includes(String(p.target||'').toLowerCase())) return false;
     if(p.scope==='product' && String(p.target||'')!==String(product.id||'')) return false;
     return true;
 }
@@ -1040,19 +1107,19 @@ function slideImage(itemId,direction){
 }
 function renderCatalog(categoryFilter='semua'){
     const grid=document.getElementById('catalog-grid');if(!grid)return;grid.innerHTML='';
-    const filtered=categoryFilter==='semua'?catalogData:catalogData.filter(i=>i.category===categoryFilter);
+    const filtered=categoryFilter==='semua'?catalogData:catalogData.filter(i=>productCategories(i).includes(categoryFilter));
     filtered.forEach(item=>{
         currentSlideIndex[item.id]=0; const active=String(item.available)!=='false'&&item.available!==false; const multi=(item.images||[]).length>1;
         const controls=multi?`<button onclick="slideImage('${item.id}',-1);event.stopPropagation();" class="absolute left-2 top-1/2 -translate-y-1/2 slider-btn w-8 h-8 flex items-center justify-center rounded-full z-10">&#10094;</button><button onclick="slideImage('${item.id}',1);event.stopPropagation();" class="absolute right-2 top-1/2 -translate-y-1/2 slider-btn w-8 h-8 flex items-center justify-center rounded-full z-10">&#10095;</button>`:'';
         const dots=multi?`<div id="dots-${item.id}" class="absolute bottom-3 left-0 w-full flex justify-center gap-1 z-10">${item.images.map((_,idx)=>`<div class="${idx===0?'w-2 h-2 rounded-full bg-gold':'w-2 h-2 rounded-full bg-white/50'}"></div>`).join('')}</div>`:'';
-        const detail=[item.size?`Size ${escapeHtml(item.size)}`:'',item.color?escapeHtml(item.color):''].filter(Boolean).join(' · ');
+        const detail=[Number(item.chestCm)>0?`LD ${escapeHtml(item.chestCm)} cm`:'',Number(item.lengthCm)>0?`PB ${escapeHtml(item.lengthCm)} cm`:'',item.color?escapeHtml(item.color):''].filter(Boolean).join(' · ');
         grid.innerHTML+=`<div class="group ${active?'cursor-pointer':'cursor-default'}" onclick="${active?`openBookingModal('${item.id}')`:''}"><div class="relative overflow-hidden bg-gray-100 aspect-[3/4] mb-4"><span class="${active?'bg-dark/80 text-gold':'bg-primary/90 text-white'} text-[10px] uppercase tracking-widest px-3 py-1 absolute top-4 right-4 border border-gold/30 z-20">${active?'Tersedia':'Nonaktif'}</span><div class="w-full h-full relative"><img id="img-${item.id}" src="${escapeHtml(item.images?.[0]||'')}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover transition duration-700 ${active?'group-hover:scale-105':'grayscale opacity-70'}">${controls}${dots}</div></div><div class="text-center px-2"><h3 class="font-serif font-bold text-lg text-dark mb-1 truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>${detail?`<p class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">${detail}</p>`:''}<div>${catalogPriceHtml(item)}</div>${active?`<span class="mt-3 inline-block text-xs uppercase tracking-widest font-bold border-b border-dark pb-1 group-hover:text-gold group-hover:border-gold transition">Pesan Sekarang</span>`:`<span class="mt-3 block text-xs text-gray-400">Tidak Tersedia</span>`}</div></div>`;
     });
 }
 function openBookingModal(itemId){
     const item=catalogData.find(i=>i.id===itemId);if(!item)return;
     document.getElementById('form-item-id').value=itemId;
-    document.getElementById('booking-item-details').innerHTML=`<div class="flex items-center gap-4 border border-gray-100 p-2 bg-gray-50"><img src="${escapeHtml(item.images?.[0]||'')}" class="w-16 h-16 object-cover rounded-sm"><div><h4 class="font-bold text-sm text-dark">${escapeHtml(item.name)}</h4><p class="text-[10px] text-gray-500">${item.size?`Size ${escapeHtml(item.size)}`:''}${item.color?` · ${escapeHtml(item.color)}`:''}</p><div class="text-primary text-xs font-bold">${catalogPriceHtml(item)}</div></div></div>`;
+    document.getElementById('booking-item-details').innerHTML=`<div class="flex items-center gap-4 border border-gray-100 p-2 bg-gray-50"><img src="${escapeHtml(item.images?.[0]||'')}" class="w-16 h-16 object-cover rounded-sm"><div><h4 class="font-bold text-sm text-dark">${escapeHtml(item.name)}</h4><p class="text-[10px] text-gray-500">${Number(item.chestCm)>0?`LD ${escapeHtml(item.chestCm)} cm`:''}${Number(item.lengthCm)>0?` · PB ${escapeHtml(item.lengthCm)} cm`:''}${item.color?` · ${escapeHtml(item.color)}`:''}</p><div class="text-primary text-xs font-bold">${catalogPriceHtml(item)}</div></div></div>`;
     document.getElementById('form-date-start').min=nowISODate();document.getElementById('form-date-end').min=nowISODate();document.getElementById('form-voucher').value='';document.getElementById('booking-error').classList.add('hide');
     updateBookingQuote();openModal('modal-booking');
 }
@@ -1115,28 +1182,23 @@ function openAccessPanel(){
 }
 async function enterWorkspace(ev){
     ev.preventDefault();
-    const e=document.getElementById('access-error'),x=document.getElementById('access-key');
-    e.classList.add('hide');
-    const k=(x?.value||'').trim();
-    if(!_q1(k)){e.textContent='Kode akses tidak sesuai.';e.classList.remove('hide');return;}
+    const e=document.getElementById('access-error'),x=document.getElementById('access-key');e.classList.add('hide');
+    const k=(x?.value||'').trim();if(!_q1(k)){e.textContent='Kode akses tidak sesuai.';e.classList.remove('hide');return;}
     if(!API_READY()){e.textContent='Koneksi data belum tersedia.';e.classList.remove('hide');return;}
+    showProcessLoader('Membuka Portal','Memverifikasi akses dan menyiapkan dashboard...',12);
     try{
-        const out=await api('session',{k});
+        const out=await api('session',{k},false,50000);updateProcessLoader('Akses diterima','Menyiapkan data operasional...',72);
         sessionStorage.setItem(TOKEN_KEY,out.token);
-        closeModal('modal-access');
-        navigate('admin-dashboard');
-        await refreshAdminData();
-        switchAdminTab('sewa');
-    }catch(err){
-        e.textContent=err.message==='ACCESS_DENIED'?'Kode akses tidak sesuai.':'Koneksi portal gagal: '+err.message;
-        e.classList.remove('hide');
-    }
+        catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||bespokePricingData;paymentData=out.payments||[];reminderData=out.reminders||[];
+        savePublicCache();closeModal('modal-access');navigate('admin-dashboard');renderAdminAll();renderCatalog(activeCatalogFilter);switchAdminTab('sewa');
+        updateProcessLoader('Portal Siap','Data berhasil dimuat.',100);await new Promise(r=>setTimeout(r,180));hideProcessLoader();
+    }catch(err){hideProcessLoader();e.textContent=err.message==='ACCESS_DENIED'?'Kode akses tidak sesuai.':'Koneksi portal gagal: '+err.message;e.classList.remove('hide');}
 }
 function logoutAdmin(){sessionStorage.removeItem(TOKEN_KEY);orderData=[];customOrderData=[];paymentData=[];reminderData=[];navigate('home');}
-async function refreshAdminData(){
+async function refreshAdminData(silent=false){
     if(!getToken())return;
     try{
-        const out=await api('adminData',{},true);
+        const out=await api('adminData',{},true,45000,silent);
         catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||bespokePricingData;paymentData=out.payments||[];reminderData=out.reminders||[];
         savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);
     }catch(err){
@@ -1275,40 +1337,67 @@ function renderReminders(){
 function openReminderWA(id){const r=reminderData.find(x=>x.id===id);if(!r)return;showWAPreview(r.wa,r.message,r.id);}
 
 // ---------- ADMIN BESPOKE ----------
+function showBespokeDetail(id){
+    const o=customOrderData.find(x=>x.id===id);if(!o)return;const m=o.measurements||{};
+    const groups=[['Ukuran Badan',['neck','chest','waist','hip','chestWidth','shoulder','smallShoulder','backWidth','backLength','blouseLength','frontLength','bustHeight','sideLength','kebayaLength']],['Ukuran Tangan',['sleeveLength','armhole','upperArm','elbow','wrist']],['Ukuran Celana',['riseLength','thigh','knee','ankle']]];
+    const block=(title,keys)=>`<div class="border border-gray-100"><div class="bg-lightBg px-4 py-3 font-serif font-bold text-primary">${title}</div><div class="grid grid-cols-2 md:grid-cols-3 gap-x-5 p-4">${keys.map(k=>`<div class="py-2 border-b border-gray-100"><div class="text-[9px] uppercase text-gray-400">${escapeHtml(MEASUREMENT_FIELDS[k]||k)}</div><div class="font-bold text-sm">${Number(m[k]||0)>0?escapeHtml(m[k])+' cm':'-'}</div></div>`).join('')}</div></div>`;
+    document.getElementById('bespoke-detail-title').textContent=`${o.name} · ${o.id}`;
+    document.getElementById('bespoke-detail-content').innerHTML=`<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5"><div class="bg-lightBg p-3"><div class="text-[9px] uppercase text-gray-400">Model</div><b class="text-xs">${escapeHtml(o.pricingItem||'-')}</b></div><div class="bg-lightBg p-3"><div class="text-[9px] uppercase text-gray-400">BB / Tinggi</div><b class="text-xs">${escapeHtml(o.weightHeight||'-')}</b></div><div class="bg-lightBg p-3"><div class="text-[9px] uppercase text-gray-400">Fitting</div><b class="text-xs">${dateID(o.fittingDate)}</b></div><div class="bg-lightBg p-3"><div class="text-[9px] uppercase text-gray-400">Ambil</div><b class="text-xs">${dateID(o.pickupDate)}</b></div></div><div class="space-y-4">${groups.map(g=>block(g[0],g[1])).join('')}</div>${o.notes?`<div class="mt-5 border p-4"><div class="mini-badge text-gray-400 mb-2">Note</div><p class="text-xs">${escapeHtml(o.notes)}</p></div>`:''}`;
+    openModal('modal-bespoke-detail');
+}
+async function updateBespokeStatus(id,status){
+    try{const out=await api('updateBespoke',{id,status},true);const idx=customOrderData.findIndex(x=>x.id===id);if(idx>=0)customOrderData[idx]=out.bespoke;renderAdminCustom();}
+    catch(err){alert('Gagal memperbarui status Bespoke: '+err.message);await refreshAdminData();}
+}
+function adminBespokeWA(id){const o=customOrderData.find(x=>x.id===id);if(!o)return;showWAPreview(o.wa,buildBespokeWA(o));}
 function renderAdminCustom(){
     const tb=document.getElementById('admin-custom-table');if(!tb)return;
     if(!customOrderData.length){tb.innerHTML='<tr><td class="p-8 text-center text-gray-400">Belum ada pesanan bespoke.</td></tr>';return;}
     tb.innerHTML='<tr class="bg-gray-50 text-[10px] uppercase text-gray-500"><th class="p-3 text-left">ID</th><th class="p-3 text-left">Pelanggan</th><th class="p-3 text-left">Model</th><th class="p-3 text-left">Estimasi</th><th class="p-3 text-left">Status</th><th class="p-3 text-left">Aksi</th></tr>'+[...customOrderData].reverse().map(o=>`<tr class="border-b"><td class="p-3 text-xs font-bold">${escapeHtml(o.id)}</td><td class="p-3"><div class="text-xs font-bold">${escapeHtml(o.name)}</div><div class="text-[10px] text-gray-500">+${escapeHtml(o.wa)}</div></td><td class="p-3"><div class="text-xs">${escapeHtml(o.pricingItem||'-')}</div><div class="text-[9px] text-gray-400">${escapeHtml(o.pickupDate?dateID(o.pickupDate):'')}</div></td><td class="p-3 text-xs font-bold">${formatRupiah(o.estimate)}</td><td class="p-3"><select onchange="updateBespokeStatus('${o.id}',this.value)" class="border text-[10px] p-1">${['Lead','Quotation','DP','Production','Fitting','Done'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></td><td class="p-3"><div class="flex flex-col gap-1 w-max"><button onclick="showBespokeDetail('${o.id}')" class="bg-dark text-gold px-2 py-1 text-[9px] uppercase font-bold">Detail Ukuran</button><button onclick="adminBespokeWA('${o.id}')" class="border border-green-600 text-green-700 px-2 py-1 text-[9px] uppercase font-bold">WhatsApp</button><button onclick="openCustomerHistory('${o.wa}')" class="border border-gray-400 text-gray-600 px-2 py-1 text-[9px] uppercase font-bold">Riwayat WA</button></div></td></tr>`).join('');
 }
+function renderAdminKatalog(){
+    const tb=document.getElementById('admin-katalog-table');if(!tb)return;
+    if(!catalogData.length){tb.innerHTML='<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada data baju.</td></tr>';return;}
+    tb.innerHTML=[...catalogData].reverse().map(item=>{
+        const measure=[Number(item.chestCm)>0?`LD ${escapeHtml(item.chestCm)} cm`:'',Number(item.lengthCm)>0?`PB ${escapeHtml(item.lengthCm)} cm`:''].filter(Boolean).join(' · ');
+        return `<tr class="hover:bg-gray-50 transition border-b border-gray-100"><td class="p-3"><div class="w-14 h-16 bg-gray-100 overflow-hidden border"><img src="${escapeHtml(item.images?.[0]||'')}" class="w-full h-full object-cover" onerror="this.style.opacity='.2'"></div></td><td class="p-3"><div class="text-xs font-bold text-dark">${escapeHtml(item.name)}</div><div class="text-[9px] text-gray-400 mt-1">${escapeHtml(item.inventoryCode||item.id)}</div>${measure?`<div class="text-[9px] text-primary mt-1 font-bold">${measure}</div>`:''}${item.color?`<div class="text-[9px] text-gray-500">${escapeHtml(item.color)}${item.location?' · '+escapeHtml(item.location):''}</div>`:''}</td><td class="p-3 text-[10px] uppercase tracking-wider">${escapeHtml(categoryLabel(item.category)||'-')}</td><td class="p-3 text-xs font-bold">${formatRupiah(item.price)}</td><td class="p-3"><span class="${item.available!==false?'bg-green-100 text-green-700':'bg-red-100 text-red-700'} px-2 py-1 text-[9px] uppercase font-bold">${item.available!==false?'Ready':'Nonaktif'}</span><div class="text-[9px] text-gray-400 mt-1">${escapeHtml(item.condition||'Baik')}</div></td><td class="p-3"><div class="flex flex-col gap-1 w-max"><button onclick="openEditItemModal('${item.id}')" class="bg-dark text-gold px-2 py-1 text-[9px] uppercase font-bold">Edit</button><button onclick="deleteItem('${item.id}')" class="border border-primary text-primary px-2 py-1 text-[9px] uppercase font-bold">Hapus</button></div></td></tr>`;
+    }).join('');
+}
 function resetManageFiles(){[1,2,3].forEach(i=>{document.getElementById(`manage-file-${i}`).value='';document.getElementById(`manage-fileid-${i}`).value='';});document.getElementById('manage-upload-status').innerText='';}
 function openManageItemModal(){
-    document.getElementById('manage-modal-title').innerText='Tambah Item Baju Baru';document.getElementById('manage-mode').value='add';document.getElementById('manage-item-form').reset();document.getElementById('manage-id').value='';document.getElementById('manage-deposit').value=100000;document.getElementById('manage-cleaning').value=0;document.getElementById('manage-late-fee').value=50000;document.getElementById('manage-condition').value='Baik';resetManageFiles();openModal('modal-manage-item');
+    const f=document.getElementById('manage-item-form');f.reset();document.getElementById('manage-modal-title').innerText='Tambah Item Baju Baru';document.getElementById('manage-mode').value='add';document.getElementById('manage-id').value='';document.getElementById('manage-deposit').value=100000;document.getElementById('manage-cleaning').value=0;document.getElementById('manage-late-fee').value=50000;document.getElementById('manage-condition').value='Baik';resetManageFiles();setRentCategories('wisuda');openModal('modal-manage-item');
 }
 function openEditItemModal(id){
-    const item=catalogData.find(i=>i.id===id);if(!item)return;document.getElementById('manage-modal-title').innerText='Edit Data: '+item.name;document.getElementById('manage-mode').value='edit';document.getElementById('manage-id').value=item.id;document.getElementById('manage-name').value=item.name;document.getElementById('manage-inventory-code').value=item.inventoryCode||'';document.getElementById('manage-category').value=item.category;document.getElementById('manage-size').value=item.size||'';document.getElementById('manage-color').value=item.color||'';document.getElementById('manage-location').value=item.location||'';document.getElementById('manage-condition').value=item.condition||'Baik';document.getElementById('manage-late-fee').value=item.lateFeePerDay||0;document.getElementById('manage-price').value=item.price;document.getElementById('manage-compare-price').value=item.comparePrice||'';document.getElementById('manage-deposit').value=item.deposit||0;document.getElementById('manage-cleaning').value=item.cleaningFee||0;document.getElementById('manage-status').value=String(item.available);document.getElementById('manage-description').value=item.description||'';document.getElementById('manage-img-1').value=item.images?.[0]||'';document.getElementById('manage-img-2').value=item.images?.[1]||'';document.getElementById('manage-img-3').value=item.images?.[2]||'';[1,2,3].forEach((n,idx)=>{document.getElementById(`manage-file-${n}`).value='';document.getElementById(`manage-fileid-${n}`).value=item.imageFileIds?.[idx]||'';});document.getElementById('manage-upload-status').innerText='';openModal('modal-manage-item');
+    const item=catalogData.find(i=>i.id===id);if(!item)return;
+    document.getElementById('manage-modal-title').innerText='Edit Data: '+item.name;document.getElementById('manage-mode').value='edit';document.getElementById('manage-id').value=item.id;document.getElementById('manage-name').value=item.name;document.getElementById('manage-inventory-code').value=item.inventoryCode||'';setRentCategories(item.category);document.getElementById('manage-chest-cm').value=item.chestCm||'';document.getElementById('manage-length-cm').value=item.lengthCm||'';document.getElementById('manage-color').value=item.color||'';document.getElementById('manage-location').value=item.location||'';document.getElementById('manage-condition').value=item.condition||'Baik';document.getElementById('manage-late-fee').value=item.lateFeePerDay||0;document.getElementById('manage-price').value=item.price;document.getElementById('manage-compare-price').value=item.comparePrice||'';document.getElementById('manage-deposit').value=item.deposit||0;document.getElementById('manage-cleaning').value=item.cleaningFee||0;document.getElementById('manage-status').value=String(item.available);document.getElementById('manage-description').value=item.description||'';document.getElementById('manage-img-1').value=item.images?.[0]||'';document.getElementById('manage-img-2').value=item.images?.[1]||'';document.getElementById('manage-img-3').value=item.images?.[2]||'';[1,2,3].forEach((n,idx)=>{document.getElementById(`manage-file-${n}`).value='';document.getElementById(`manage-fileid-${n}`).value=item.imageFileIds?.[idx]||'';});document.getElementById('manage-upload-status').innerText='';openModal('modal-manage-item');
 }
 async function submitManageItem(e){
-    e.preventDefault();const mode=document.getElementById('manage-mode').value,status=document.getElementById('manage-upload-status'),btn=document.getElementById('manage-submit-btn');btn.disabled=true;btn.classList.add('opacity-50');
+    e.preventDefault();const mode=document.getElementById('manage-mode').value,status=document.getElementById('manage-upload-status'),btn=document.getElementById('manage-submit-btn');syncRentCategories();
+    const categories=document.getElementById('manage-category').value;if(!categories){alert('Pilih minimal satu kategori sewa.');return;}
+    btn.disabled=true;btn.classList.add('opacity-50');showProcessLoader('Menyimpan Data Baju','Menyiapkan data dan foto...',8);
+    let saved=null;
     try{
-        const images=[document.getElementById('manage-img-1').value.trim(),document.getElementById('manage-img-2').value.trim(),document.getElementById('manage-img-3').value.trim()];
-        const fileIds=[document.getElementById('manage-fileid-1').value,document.getElementById('manage-fileid-2').value,document.getElementById('manage-fileid-3').value];
+        const images=[1,2,3].map(i=>document.getElementById(`manage-img-${i}`).value.trim());const fileIds=[1,2,3].map(i=>document.getElementById(`manage-fileid-${i}`).value);
+        const selected=[1,2,3].map(i=>document.getElementById(`manage-file-${i}`).files[0]).filter(Boolean);let done=0;
         for(let i=0;i<3;i++){
-            const file=document.getElementById(`manage-file-${i+1}`).files[0];
-            if(file){status.innerText=`Mengunggah foto ${i+1} ke Google Drive...`;const up=await uploadAdminFile(file,'product',`${document.getElementById('manage-inventory-code').value||'Baju'}-${i+1}`);images[i]=up.url;fileIds[i]=up.fileId;}
+            const file=document.getElementById(`manage-file-${i+1}`).files[0];if(!file)continue;
+            const pct=15+Math.round((done/Math.max(1,selected.length))*55);status.innerText=`Mengunggah foto ${i+1}...`;updateProcessLoader('Mengunggah Foto',`Foto ${i+1} dari ${selected.length} sedang diproses dan disimpan ke Google Drive.`,pct);
+            const up=await uploadAdminFile(file,'product',`${document.getElementById('manage-inventory-code').value||'Baju'}-${i+1}`);images[i]=up.url;fileIds[i]=up.fileId;done++;
         }
         if(!images[0])throw new Error('Foto utama wajib diisi melalui upload atau URL.');
-        const item={id:mode==='edit'?document.getElementById('manage-id').value:'',name:document.getElementById('manage-name').value.trim(),inventoryCode:document.getElementById('manage-inventory-code').value.trim(),category:document.getElementById('manage-category').value,size:document.getElementById('manage-size').value.trim(),color:document.getElementById('manage-color').value.trim(),location:document.getElementById('manage-location').value.trim(),condition:document.getElementById('manage-condition').value,lateFeePerDay:Number(document.getElementById('manage-late-fee').value||0),description:document.getElementById('manage-description').value.trim(),price:Number(document.getElementById('manage-price').value),comparePrice:Number(document.getElementById('manage-compare-price').value||0),deposit:Number(document.getElementById('manage-deposit').value||0),cleaningFee:Number(document.getElementById('manage-cleaning').value||0),available:document.getElementById('manage-status').value==='true',images,imageFileIds:fileIds};
-        status.innerText='Menyimpan data ke Spreadsheet...';const out=await api('upsertProduct',item,true);const saved=out.product;const idx=catalogData.findIndex(x=>x.id===saved.id);if(idx>=0)catalogData[idx]=saved;else catalogData.push(saved);savePublicCache();closeModal('modal-manage-item');renderAdminKatalog();renderCatalog(activeCatalogFilter);showSuccessAlert('Database Diperbarui','Data baju tersimpan ke Google Sheet dan foto upload tersimpan di Google Drive.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);
-    }catch(err){alert('Gagal menyimpan: '+err.message);}finally{btn.disabled=false;btn.classList.remove('opacity-50');status.innerText='';}
+        updateProcessLoader('Menyimpan Database','Menulis data baju ke spreadsheet yang sama...',82);status.innerText='Menyimpan data ke Spreadsheet...';
+        const chestCm=Number(document.getElementById('manage-chest-cm').value||0),lengthCm=Number(document.getElementById('manage-length-cm').value||0);
+        const item={id:mode==='edit'?document.getElementById('manage-id').value:'',name:document.getElementById('manage-name').value.trim(),inventoryCode:document.getElementById('manage-inventory-code').value.trim(),category:categories,chestCm,lengthCm,size:[chestCm?`LD ${chestCm}`:'',lengthCm?`PB ${lengthCm}`:''].filter(Boolean).join(' / '),color:document.getElementById('manage-color').value.trim(),location:document.getElementById('manage-location').value.trim(),condition:document.getElementById('manage-condition').value,lateFeePerDay:Number(document.getElementById('manage-late-fee').value||0),description:document.getElementById('manage-description').value.trim(),price:Number(document.getElementById('manage-price').value),comparePrice:Number(document.getElementById('manage-compare-price').value||0),deposit:Number(document.getElementById('manage-deposit').value||0),cleaningFee:Number(document.getElementById('manage-cleaning').value||0),available:document.getElementById('manage-status').value==='true',images,imageFileIds:fileIds};
+        const out=await api('upsertProduct',item,true,50000);saved=out.product;
+    }catch(err){hideProcessLoader();btn.disabled=false;btn.classList.remove('opacity-50');status.innerText='';alert('Gagal menyimpan: '+err.message);return;}
+    // Data server sudah berhasil. Error render UI setelah titik ini tidak boleh dianggap sebagai kegagalan penyimpanan.
+    try{
+        const idx=catalogData.findIndex(x=>x.id===saved.id);if(idx>=0)catalogData[idx]=saved;else catalogData.push(saved);savePublicCache();renderAdminKatalog();renderCatalog(activeCatalogFilter);closeModal('modal-manage-item');
+    }catch(uiErr){console.error('UI refresh:',uiErr);}
+    updateProcessLoader('Berhasil Disimpan','Data sudah masuk ke Google Sheet dan frontend diperbarui.',100);await new Promise(r=>setTimeout(r,180));hideProcessLoader();btn.disabled=false;btn.classList.remove('opacity-50');status.innerText='';showSuccessAlert('Database Diperbarui','Data baju berhasil tersimpan. Foto tersimpan di Google Drive dan data tetap menggunakan spreadsheet IndCollection yang sama.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);
 }
-async function deleteItem(id){if(!confirm('PERINGATAN: Hapus item ini dari katalog?'))return;try{await api('deleteProduct',{id},true);catalogData=catalogData.filter(i=>i.id!==id);savePublicCache();renderAdminKatalog();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal menghapus: '+err.message);}}
-async function syncSheetNow(){const btn=document.getElementById('sync-sheet-btn');if(btn)btn.disabled=true;try{await refreshAdminData();showSuccessAlert('Sinkronisasi Selesai','Data terbaru dari Google Sheet sudah dimuat ke dashboard dan frontend.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);}finally{if(btn)btn.disabled=false;}}
-
-// ---------- FILE PREPARATION / UPLOAD ----------
-function readFileAsDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=()=>reject(r.error);r.readAsDataURL(file);});}
-async function compressImageFile(file,maxDim=1600,quality=.82){
-    const data=await readFileAsDataURL(file),img=new Image();await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=data;});let w=img.width,h=img.height,scale=Math.min(1,maxDim/Math.max(w,h));w=Math.round(w*scale);h=Math.round(h*scale);const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);return {base64:canvas.toDataURL('image/jpeg',quality).split(',')[1],mimeType:'image/jpeg',fileName:String(file.name).replace(/\.[^.]+$/, '')+'.jpg'};
-}
+async function deleteItem(id){if(!confirm('PERINGATAN: Hapus item ini dari katalog?'))return;showProcessLoader('Menghapus Item','Memperbarui database...',30);try{await api('deleteProduct',{id},true);catalogData=catalogData.filter(i=>i.id!==id);savePublicCache();renderAdminKatalog();renderCatalog(activeCatalogFilter);updateProcessLoader('Selesai','Item sudah dihapus.',100);await new Promise(r=>setTimeout(r,150));}catch(err){alert('Gagal menghapus: '+err.message);}finally{hideProcessLoader();}}
+async function syncSheetNow(){const btn=document.getElementById('sync-sheet-btn');if(btn)btn.disabled=true;showProcessLoader('Sinkronisasi','Mengambil data terbaru dari spreadsheet...',20);try{await refreshAdminData();updateProcessLoader('Sinkronisasi Selesai','Dashboard dan frontend sudah diperbarui.',100);await new Promise(r=>setTimeout(r,160));hideProcessLoader();showSuccessAlert('Sinkronisasi Selesai','Data terbaru dari Google Sheet sudah dimuat ke dashboard dan frontend.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);}catch(err){hideProcessLoader();alert('Sinkronisasi gagal: '+err.message);}finally{if(btn)btn.disabled=false;}}
 async function prepareUpload(file){
     if(file.type.startsWith('image/'))return compressImageFile(file);
     const data=await readFileAsDataURL(file);return {base64:data.split(',')[1],mimeType:file.type||'application/octet-stream',fileName:file.name};
@@ -1325,7 +1414,7 @@ async function submitPromo(e){e.preventDefault();const p={id:document.getElement
 async function deletePromo(id){if(!confirm('Hapus promo ini?'))return;try{await api('deletePromo',{id},true);promoData=promoData.filter(x=>x.id!==id);savePublicCache();renderAdminPromo();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal: '+err.message);}}
 
 document.addEventListener('DOMContentLoaded',bootstrap);
-setInterval(()=>{if(getToken()&&!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData();},60000);
+setInterval(()=>{if(getToken()&&!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData(true);},90000);
 
     </script>
 </body>
