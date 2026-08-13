@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndCollection - Exclusive Kebaya & Bespoke Dress</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF untuk generate Invoice -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- QR Code untuk referensi Invoice -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7B1113', /* Maroon Elegan / Ruby Red */
+                        primaryDark: '#54080B',
+                        gold: '#D4AF37', /* Gold/Emas */
+                        goldLight: '#F3E5AB',
+                        dark: '#1A1A1A',
+                        lightBg: '#FDFBF7' /* Off-white / Cream sangat muda */
+                    },
+                    fontFamily: {
+                        serif: ['"Cinzel"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    },
+                    animation: {
+                        'modal-pop': 'modalPop 0.3s ease-out forwards',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        modalPop: {
+                            '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #FDFBF7; color: #1A1A1A; }
+        h1, h2, h3, h4, h5, .font-serif { font-family: '"Cinzel"', serif; }
+        .hide { display: none !important; }
+        .modal-bg { background-color: rgba(26, 26, 26, 0.85); backdrop-filter: blur(4px); }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FDFBF7; }
+        ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7B1113; }
+        
+        input:focus, textarea:focus, select:focus { border-color: #D4AF37 !important; box-shadow: 0 0 0 1px #D4AF37 !important; }
+        
+        .hero-overlay { background: linear-gradient(to right, rgba(26,26,26,0.9) 0%, rgba(123,17,19,0.7) 100%); }
+        
+        /* Checkbox Custom styling */
+        .custom-checkbox input:checked + div { background-color: #7B1113; border-color: #7B1113; }
+        .custom-checkbox input:checked + div svg { display: block; }
+
+        /* Slider Controls */
+        .slider-btn { background: rgba(0,0,0,0.5); color: white; transition: background 0.3s ease; }
+        .slider-btn:hover { background: rgba(212,175,55,0.9); }
+
+        /* V5 - Bespoke Studio. Extends the original IndCollection visual language only. */
+        .bespoke-section { border: 1px solid #E9E4DC; background: #fff; }
+        .bespoke-section-head { background: #FDFBF7; border-bottom: 1px solid #E9E4DC; }
+        .bespoke-step { width: 26px; height: 26px; border: 1px solid #D4AF37; color: #7B1113; display:flex; align-items:center; justify-content:center; font: 700 11px Montserrat,sans-serif; }
+        .measure-input { width:100%; border:0; border-bottom:1px solid #D1D5DB; background:transparent; padding:.45rem .25rem; font-size:.78rem; outline:none; }
+        .measure-input:focus { border-color:#D4AF37 !important; box-shadow:none !important; }
+        .price-choice:checked + label { border-color:#7B1113; background:#FDFBF7; box-shadow: inset 3px 0 0 #7B1113; }
+        .mini-badge { font-size:9px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+        .sticky-estimate { position:sticky; top:1rem; }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+    <!-- Top Bar: Waktu Real-time -->
+    <div class="bg-primaryDark text-goldLight text-xs tracking-widest py-2 px-4 flex justify-between items-center border-b border-gold/30">
+        <div class="max-w-7xl mx-auto w-full flex justify-between">
+            <span class="uppercase tracking-wider">Layanan Eksklusif Seluruh Indonesia</span>
+            <span id="realtime-clock" class="font-medium tracking-widest"></span>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-40 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="navigate('home')">
+                <div class="w-8 h-8 bg-primary rounded-sm flex items-center justify-center transform rotate-45">
+                    <span class="text-white font-serif transform -rotate-45 font-bold text-lg">IC</span>
+                </div>
+                <h1 class="text-2xl font-serif font-bold text-primary tracking-wide ml-2">Ind<span class="text-gold">Collection</span></h1>
+            </div>
+            
+            <div class="space-x-8 hidden md:flex items-center text-sm font-medium tracking-wide uppercase">
+                <button onclick="navigate('home')" class="text-dark hover:text-primary transition-colors">Beranda</button>
+                <button onclick="navigate('catalog')" class="text-dark hover:text-primary transition-colors">Sewa Kebaya</button>
+                <button onclick="navigate('bespoke')" class="text-gold hover:text-primary transition-colors border-b border-transparent hover:border-primary pb-1">Bespoke / Custom</button>
+                <button onclick="openAdminLoginModal()" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Admin</button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-primary" onclick="document.getElementById('mobile-menu').classList.toggle('hide')">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hide md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-4 shadow-lg absolute w-full">
+            <button onclick="navigate('home'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Beranda</button>
+            <button onclick="navigate('catalog'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Sewa Kebaya</button>
+            <button onclick="navigate('bespoke'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide text-gold">Bespoke / Custom Dress</button>
+            <button onclick="openAdminLoginModal(); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Admin Login</button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        
+        <!-- ================= BERANDA ================= -->
+        <section id="view-home" class="view-section animate-fade-in">
+            <div class="relative bg-dark h-[80vh] flex items-center overflow-hidden">
+                <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1595152772835-219674b2a8a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-40"></div>
+                <div class="absolute inset-0 hero-overlay"></div>
+                
+                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center md:text-left">
+                    <span class="text-gold tracking-[0.3em] uppercase text-sm mb-4 block font-medium">Elegansi & Tradisi</span>
+                    <h2 class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight">Keanggunan <br><span class="text-primaryLight italic text-gold">Sempurna</span></h2>
+                    <p class="text-gray-300 max-w-xl mx-auto md:mx-0 mb-10 text-lg font-light">Penyewaan kebaya premium dan layanan pembuatan gaun kustom eksklusif (Bespoke) dari tangan profesional.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                        <button onclick="navigate('catalog')" class="bg-primary text-white border border-primary px-8 py-4 rounded-sm hover:bg-primaryDark transition-all duration-300 font-medium tracking-wide uppercase text-sm shadow-[0_0_15px_rgba(123,17,19,0.5)]">Sewa Kebaya</button>
+                        <button onclick="navigate('bespoke')" class="bg-transparent text-gold border border-gold px-8 py-4 rounded-sm hover:bg-gold hover:text-dark transition-all duration-300 font-medium tracking-wide uppercase text-sm">Lihat Portofolio Bespoke</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= KATALOG SEWA ================= -->
+        <section id="view-catalog" class="view-section hide max-w-7xl mx-auto px-4 py-16 animate-fade-in">
+            <div class="text-center mb-12">
+                <span class="text-primary tracking-[0.2em] uppercase text-xs font-bold block mb-2">Koleksi Ready to Wear</span>
+                <h2 class="text-4xl font-serif font-bold text-dark">Sewa Kebaya Premium</h2>
+                <div class="w-24 h-1 bg-gold mx-auto mt-6"></div>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <button onclick="filterCatalog('semua', event)" class="filter-btn active bg-dark text-gold border border-dark px-6 py-2 text-sm uppercase tracking-wide transition-all">Semua</button>
+                <button onclick="filterCatalog('wisuda', event)" class="filter-btn bg-transparent text-dark border border-gray-300 hover:border-dark px-6 py-2 text-sm uppercase tracking-wide transition-all">Wisuda</button>
+                <button onclick="filterCatalog('pengantin', event)" class="filter-btn bg-transparent text-dark border border-gray-300 hover:border-dark px-6 py-2 text-sm uppercase tracking-wide transition-all">Pengantin</button>
+            </div>
+            <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+        </section>
+
+        <!-- ================= HALAMAN BESPOKE (PORTOFOLIO & FORM) ================= -->
+        <section id="view-bespoke" class="view-section hide animate-fade-in">
+            <!-- Header Portofolio -->
+            <div class="bg-dark text-white py-20 px-4 text-center">
+                <span class="text-gold tracking-[0.3em] uppercase text-xs font-bold block mb-3">Layanan Jahit Eksklusif</span>
+                <h2 class="text-4xl md:text-5xl font-serif font-bold mb-6">Mahakarya IndCollection</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">Lebih dari ratusan gaun dan kebaya impian telah kami wujudkan dengan presisi dan dedikasi tinggi. Temukan inspirasi Anda melalui portofolio karya terbaik kami di bawah ini.</p>
+            </div>
+
+            <!-- Galeri Portofolio -->
+            <div class="max-w-7xl mx-auto px-4 py-16">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+                    <!-- Item Portofolio 1 -->
+                    <div class="group relative overflow-hidden h-96 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Detail Payet Kebaya Pengantin" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-0 left-0 p-6 w-full transform translate-y-4 group-hover:translate-y-0 transition duration-500">
+                            <span class="text-gold text-[10px] uppercase tracking-widest font-bold">Kebaya Pengantin</span>
+                            <h3 class="text-white font-serif text-xl mt-1">Full Payet Eksklusif</h3>
+                        </div>
+                    </div>
+                    <!-- Item Portofolio 2 -->
+                    <div class="group relative overflow-hidden h-96 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1610484518382-748a80d563be?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kebaya Modern Wisuda" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-0 left-0 p-6 w-full transform translate-y-4 group-hover:translate-y-0 transition duration-500">
+                            <span class="text-gold text-[10px] uppercase tracking-widest font-bold">Dress Modern</span>
+                            <h3 class="text-white font-serif text-xl mt-1">Silk Satin Velvet</h3>
+                        </div>
+                    </div>
+                    <!-- Item Portofolio 3 -->
+                    <div class="group relative overflow-hidden h-96 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1566861298453-73130c25a07c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kebaya Klasik" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-80"></div>
+                        <div class="absolute bottom-0 left-0 p-6 w-full transform translate-y-4 group-hover:translate-y-0 transition duration-500">
+                            <span class="text-gold text-[10px] uppercase tracking-widest font-bold">Klasik Kontemporer</span>
+                            <h3 class="text-white font-serif text-xl mt-1">Kutubaru Modern</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-16">
+                    <h3 class="text-2xl font-serif text-dark mb-4">Siap Mewujudkan Gaun Impian Anda?</h3>
+                    <button onclick="openCustomDressModal()" class="bg-primary text-white px-10 py-4 hover:bg-primaryDark transition shadow-lg text-sm uppercase tracking-widest font-bold border border-primary">Mulai Konsultasi & Cek Estimasi Harga</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ADMIN DASHBOARD ================= -->
+        <section id="view-admin-dashboard" class="view-section hide max-w-7xl mx-auto px-4 py-16 animate-fade-in">
+             <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-10 border-b pb-6">
+                <div>
+                    <h2 class="text-3xl font-serif font-bold text-primary mb-2">Portal Manajemen</h2>
+                    <p class="text-gray-500 text-sm">Kontrol penuh atas penyewaan, pesanan kustom, dan database katalog.</p>
+                </div>
+                <button onclick="logoutAdmin()" class="mt-4 md:mt-0 text-sm border border-dark text-dark px-6 py-2 hover:bg-dark hover:text-white transition-all uppercase tracking-wide">Keluar Sistem</button>
+            </div>
+            
+            <div class="flex overflow-x-auto mb-6 space-x-1 border-b border-gray-200">
+                <button onclick="switchAdminTab('sewa')" id="tab-sewa" class="px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap">Penyewaan</button>
+                <button onclick="switchAdminTab('custom')" id="tab-custom" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Pesanan Bespoke</button>
+                <button onclick="switchAdminTab('katalog')" id="tab-katalog" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Kelola Katalog <span class="text-gold ml-1">★</span></button>
+                <button onclick="switchAdminTab('promo')" id="tab-promo" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Promo & Harga</button>
+                <button onclick="switchAdminTab('bespokeprice')" id="tab-bespokeprice" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Harga Bespoke</button>
+                <button onclick="switchAdminTab('calendar')" id="tab-calendar" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Kalender</button>
+                <button onclick="switchAdminTab('reminder')" id="tab-reminder" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Reminder</button>
+            </div>
+
+            <!-- PENYEWAAN -->
+            <div id="admin-sewa-container" class="bg-white shadow-lg border border-gray-100 overflow-x-auto rounded-b-md rounded-tr-md">
+                <table class="min-w-full"><tbody id="admin-orders-table" class="bg-white divide-y divide-gray-100"></tbody></table>
+            </div>
+
+            <!-- BESPOKE -->
+            <div id="admin-custom-container" class="hide bg-white shadow-lg border border-gray-100 overflow-x-auto rounded-b-md rounded-tr-md">
+                <table class="min-w-full"><tbody id="admin-custom-table" class="bg-white divide-y divide-gray-100"></tbody></table>
+            </div>
+
+            <!-- KELOLA KATALOG: form tetap mengikuti bahasa visual admin awal -->
+            <div id="admin-katalog-container" class="hide bg-white shadow-lg border border-gray-100 rounded-b-md rounded-tr-md p-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+                    <div>
+                        <h3 class="font-serif font-bold text-xl text-dark">Database Baju & Dress</h3>
+                        <p class="text-xs text-gray-500 mt-1">Input dari Admin akan masuk ke sheet Products dan langsung dipakai oleh frontend.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="sync-sheet-btn" onclick="syncSheetNow()" class="border border-dark text-dark px-4 py-2 hover:bg-dark hover:text-white transition rounded-sm uppercase tracking-widest text-[10px] font-bold">↻ Sinkronkan Sheet</button>
+                        <button onclick="openManageItemModal()" class="bg-dark text-gold px-4 py-2 hover:bg-black transition rounded-sm uppercase tracking-widest text-[10px] font-bold">+ Tambah Item Baru</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 text-gray-500"><tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Foto</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Info Baju</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Kategori</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Harga Sewa</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Aksi</th>
+                        </tr></thead>
+                        <tbody id="admin-katalog-table" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PROMO -->
+            <div id="admin-promo-container" class="hide bg-white shadow-lg border border-gray-100 rounded-b-md rounded-tr-md p-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+                    <div><h3 class="font-serif font-bold text-xl text-dark">Promo & Harga Event</h3><p class="text-xs text-gray-500 mt-1">Atur promo otomatis tanpa mengubah harga dasar katalog.</p></div>
+                    <button onclick="openPromoModal()" class="bg-dark text-gold px-4 py-2 hover:bg-black transition rounded-sm uppercase tracking-widest text-[10px] font-bold">+ Tambah Promo</button>
+                </div>
+                <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 text-gray-500"><tr><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Promo</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Nilai</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Periode</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Target</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Aksi</th></tr></thead>
+                    <tbody id="admin-promo-table" class="bg-white divide-y divide-gray-100"></tbody>
+                </table></div>
+            </div>
+
+
+            <!-- MASTER HARGA BESPOKE -->
+            <div id="admin-bespokeprice-container" class="hide bg-white shadow-lg border border-gray-100 rounded-b-md rounded-tr-md p-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+                    <div>
+                        <h3 class="font-serif font-bold text-xl text-dark">Master Harga Bespoke</h3>
+                        <p class="text-xs text-gray-500 mt-1">Sumber harga untuk kalkulator Bespoke. Ubah melalui Admin atau sheet BespokePricing.</p>
+                    </div>
+                    <button onclick="openBespokePriceModal()" class="bg-dark text-gold px-4 py-2 hover:bg-black transition rounded-sm uppercase tracking-widest text-[10px] font-bold">+ Tambah Harga</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 text-gray-500"><tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Kategori</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Item</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Harga</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Unit</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Aksi</th>
+                        </tr></thead>
+                        <tbody id="admin-bespokeprice-table" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- KALENDER VISUAL -->
+            <div id="admin-calendar-container" class="hide bg-white shadow-lg border border-gray-100 rounded-b-md rounded-tr-md p-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-5">
+                    <div><h3 class="font-serif font-bold text-xl text-dark">Kalender Penyewaan</h3><p class="text-xs text-gray-500 mt-1">Melihat penggunaan baju per tanggal tanpa mengubah tampilan katalog pelanggan.</p></div>
+                    <div class="flex items-center gap-2"><button onclick="calendarPrev()" class="border px-3 py-2 text-xs">←</button><button onclick="calendarToday()" class="border px-3 py-2 text-[10px] uppercase font-bold">Hari Ini</button><button onclick="calendarNext()" class="border px-3 py-2 text-xs">→</button></div>
+                </div>
+                <h4 id="admin-calendar-title" class="font-serif text-xl text-primary mb-4"></h4>
+                <div id="admin-calendar-grid" class="grid grid-cols-7 border border-gray-100"></div>
+            </div>
+
+            <!-- REMINDER -->
+            <div id="admin-reminder-container" class="hide bg-white shadow-lg border border-gray-100 rounded-b-md rounded-tr-md">
+                <div class="p-6 border-b flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                    <div><h3 class="font-serif font-bold text-xl text-dark">Reminder Operasional</h3><p class="text-xs text-gray-500 mt-1">H-1 pengambilan, hari pengembalian, dan pelanggan terlambat. Pesan dibuka melalui WhatsApp setelah admin meninjau teks.</p></div>
+                    <button onclick="refreshReminders()" class="bg-dark text-gold px-4 py-2 text-[10px] uppercase tracking-widest font-bold">↻ Perbarui Reminder</button>
+                </div>
+                <div id="admin-reminder-list"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-goldLight py-12 border-t-4 border-primary mt-auto">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
+            <!-- Brand & IG -->
+            <div>
+                <h2 class="font-serif text-3xl text-gold mb-4">IndCollection</h2>
+                <p class="text-sm text-gray-400 mb-6 leading-relaxed max-w-md mx-auto md:mx-0">Eksklusivitas dalam setiap jahitan. Menyediakan kebaya premium untuk momen tak terlupakan Anda.</p>
+                <div class="space-y-2">
+                    <p class="text-xs uppercase tracking-widest text-gold font-bold mb-2">Instagram Kami:</p>
+                    <a href="https://www.instagram.com/ind_collection/" target="_blank" class="block text-sm text-gray-300 hover:text-white transition flex items-center justify-center md:justify-start gap-2">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        @ind_collection <span class="text-xs text-gray-500">(Bespoke/Custom)</span>
+                    </a>
+                    <a href="https://www.instagram.com/sewakebaya.bdl1/" target="_blank" class="block text-sm text-gray-300 hover:text-white transition flex items-center justify-center md:justify-start gap-2 mt-1">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        @sewakebaya.bdl1 <span class="text-xs text-gray-500">(Sewa Kebaya)</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Lokasi & WA -->
+            <div>
+                <h3 class="text-lg font-serif text-gold mb-3">Outlet Galeri di Bandar Lampung</h3>
+                <a href="https://maps.app.goo.gl/5kKjDTJwM9wyvzoq8" target="_blank" class="text-sm text-gray-300 hover:text-white transition block leading-relaxed mb-6 group bg-white/5 p-4 rounded-sm border-l-2 border-primary hover:border-gold">
+                    Jl. Ridwan Rais Gg. Ainan No.9, Kalibalau Kencana,<br>
+                    Kec. Kedamaian, Kota Bandar Lampung,<br>
+                    Lampung 35133
+                    <span class="flex items-center justify-center md:justify-start text-xs text-primary mt-2 group-hover:text-gold transition font-bold">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Buka di Google Maps &rarr;
+                    </span>
+                </a>
+                
+                <div class="mt-4">
+                    <p class="text-xs uppercase tracking-widest text-gold font-bold mb-2">Konsultasi & Reservasi:</p>
+                    <a href="https://wa.me/6281220007780" target="_blank" class="inline-flex items-center bg-green-600 text-white px-5 py-3 rounded-sm text-xs font-bold uppercase tracking-wider hover:bg-green-700 transition shadow-lg">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        WhatsApp: +62 812-2000-7780
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 text-center mt-16 pt-8 border-t border-gray-800">
+            <p class="text-xs text-gray-500 uppercase tracking-widest">&copy; 2026 IndCollection. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL ADMIN LOGIN -->
+    <div id="modal-admin-login" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-sm p-8 shadow-2xl animate-modal-pop border-t-4 border-primary relative">
+            <button onclick="closeModal('modal-admin-login')" class="absolute top-4 right-4 text-gray-400">X</button>
+            <h2 class="text-xl font-serif font-bold mb-4 text-center">Admin IndCollection</h2>
+            <input type="password" id="admin-password" class="w-full border-b-2 p-2 mb-4 outline-none" placeholder="Password">
+            <button onclick="handleLogin(event)" class="w-full bg-dark text-gold p-3 uppercase text-sm font-bold">Masuk</button>
+            <p id="login-error" class="text-primary text-xs mt-2 text-center hide">Salah!</p>
+        </div>
+    </div>
+    
+    <!-- MODAL BOOKING SEWA -->
+    <div id="modal-booking" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-xl p-8 shadow-2xl animate-modal-pop relative">
+            <button onclick="closeModal('modal-booking')" class="absolute top-4 right-4 text-gray-400">X</button>
+            <h3 class="text-xl font-serif font-bold text-primary mb-4">Form Sewa</h3>
+            <div id="booking-item-details" class="mb-4"></div>
+            <form onsubmit="submitBooking(event)">
+                <input type="hidden" id="form-item-id">
+                <input type="text" id="form-name" placeholder="Nama" class="w-full border p-2 mb-2" required>
+                <input type="tel" id="form-wa" placeholder="WA" class="w-full border p-2 mb-2" required>
+                <input type="date" id="form-date-start" class="w-full border p-2 mb-2" onchange="updateBookingQuote()" required>
+                <input type="date" id="form-date-end" class="w-full border p-2 mb-2" onchange="updateBookingQuote()" required>
+                <input type="text" id="form-voucher" placeholder="Kode Voucher (opsional)" class="w-full border p-2 mb-3 uppercase" oninput="updateBookingQuote()">
+                <div id="booking-price-summary" class="bg-gray-50 border border-gray-100 p-3 mb-4 text-xs text-gray-600"></div>
+                <p id="booking-error" class="hide text-primary text-xs mb-3"></p>
+                <button type="submit" id="booking-submit-btn" class="w-full bg-primary text-white p-3 font-bold">Sewa</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL MANAGE ITEM: tampilannya tetap satu keluarga dengan form admin awal -->
+    <div id="modal-manage-item" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar animate-modal-pop shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-10 px-8 py-5 border-b border-gray-100 flex justify-between items-center">
+                <div><h3 id="manage-modal-title" class="text-xl font-serif font-bold text-primary">Tambah Item Katalog</h3><p class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Form Admin → Spreadsheet → Frontend</p></div>
+                <button onclick="closeModal('modal-manage-item')" class="text-gray-400 hover:text-primary transition-colors">X</button>
+            </div>
+            <div class="p-8">
+                <form id="manage-item-form" onsubmit="submitManageItem(event)">
+                    <input type="hidden" id="manage-mode" value="add"><input type="hidden" id="manage-id">
+                    <input type="hidden" id="manage-fileid-1"><input type="hidden" id="manage-fileid-2"><input type="hidden" id="manage-fileid-3">
+
+                    <div class="grid grid-cols-2 gap-5 mb-6">
+                        <div class="col-span-2"><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Nama Kebaya / Dress *</label><input type="text" id="manage-name" class="w-full border-b border-gray-300 px-2 py-2 outline-none bg-transparent" required></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Kode Inventaris</label><input type="text" id="manage-inventory-code" class="w-full border-b border-gray-300 px-2 py-2 outline-none bg-transparent" placeholder="Contoh: KBY-WSD-001"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Kategori *</label><select id="manage-category" class="w-full border-b border-gray-300 px-2 py-2 bg-transparent text-sm" required><option value="wisuda">Kebaya Wisuda</option><option value="pengantin">Kebaya Pengantin</option><option value="kutubaru">Kutubaru</option><option value="dress">Gaun / Dress Modern</option></select></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Ukuran</label><input type="text" id="manage-size" class="w-full border-b border-gray-300 px-2 py-2" placeholder="S / M / L / XL / Custom"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Warna</label><input type="text" id="manage-color" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Ruby / Gold / White"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Lokasi Penyimpanan</label><input type="text" id="manage-location" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Rak A1 / Lemari 2"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Kondisi</label><select id="manage-condition" class="w-full border-b border-gray-300 px-2 py-2"><option>Baik</option><option>Perlu Perawatan</option><option>Maintenance</option><option>Rusak</option></select></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Denda Terlambat / Hari</label><input type="number" id="manage-late-fee" min="0" value="50000" class="w-full border-b border-gray-300 px-2 py-2"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Harga Sewa (Rp) *</label><input type="number" id="manage-price" min="0" class="w-full border-b border-gray-300 px-2 py-2" required></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Harga Pembanding / Coret</label><input type="number" id="manage-compare-price" min="0" class="w-full border-b border-gray-300 px-2 py-2" placeholder="Opsional"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Deposit (Rp)</label><input type="number" id="manage-deposit" min="0" value="100000" class="w-full border-b border-gray-300 px-2 py-2"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Cleaning Fee (Rp)</label><input type="number" id="manage-cleaning" min="0" value="0" class="w-full border-b border-gray-300 px-2 py-2"></div>
+                        <div class="col-span-2"><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Status Ketersediaan</label><select id="manage-status" class="w-full border-b border-gray-300 px-2 py-2 text-sm"><option value="true">Tersedia (Ready)</option><option value="false">Nonaktif / Maintenance</option></select></div>
+                        <div class="col-span-2"><label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Deskripsi / Catatan Baju</label><textarea id="manage-description" rows="2" class="w-full border border-gray-300 p-2 text-sm" placeholder="Detail bahan, aksesori, catatan kondisi, dll."></textarea></div>
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-200 p-4 mb-6">
+                        <h4 class="text-xs font-bold text-dark uppercase tracking-widest mb-1">Foto Baju — Upload Google Drive</h4>
+                        <p class="text-[10px] text-gray-500 mb-4">Pilih foto dari komputer. Sistem akan mengecilkan foto agar ringan, mengunggahnya ke folder <b>IndCollection Files / Product Photos</b> di Google Drive, lalu URL-nya disimpan ke sheet Products. URL manual tetap tersedia sebagai alternatif.</p>
+                        <div class="space-y-4">
+                            <div class="border-b pb-3"><label class="block text-[10px] font-bold uppercase mb-1">Foto 1 — Sampul Utama *</label><input type="file" id="manage-file-1" accept="image/jpeg,image/png,image/webp" class="w-full text-xs mb-2"><input type="url" id="manage-img-1" placeholder="Atau tempel URL foto..." class="w-full border p-2 text-xs"></div>
+                            <div class="border-b pb-3"><label class="block text-[10px] font-bold uppercase mb-1">Foto 2 — Opsional</label><input type="file" id="manage-file-2" accept="image/jpeg,image/png,image/webp" class="w-full text-xs mb-2"><input type="url" id="manage-img-2" placeholder="Atau tempel URL foto..." class="w-full border p-2 text-xs"></div>
+                            <div><label class="block text-[10px] font-bold uppercase mb-1">Foto 3 — Opsional</label><input type="file" id="manage-file-3" accept="image/jpeg,image/png,image/webp" class="w-full text-xs mb-2"><input type="url" id="manage-img-3" placeholder="Atau tempel URL foto..." class="w-full border p-2 text-xs"></div>
+                        </div>
+                        <p id="manage-upload-status" class="text-[10px] text-primary font-bold mt-4"></p>
+                    </div>
+                    <button id="manage-submit-btn" type="submit" class="w-full bg-primary text-white px-4 py-4 hover:bg-primaryDark transition-colors uppercase tracking-widest text-sm font-bold shadow-lg">Simpan Data Baju</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= MODAL: BESPOKE STUDIO V5 ================= -->
+    <div id="modal-custom-dress" class="hide fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 modal-bg">
+        <div class="bg-white w-full max-w-6xl max-h-[94vh] overflow-y-auto custom-scrollbar animate-modal-pop shadow-2xl relative">
+            <button onclick="closeModal('modal-custom-dress')" class="absolute top-4 right-4 text-gray-400 hover:text-primary transition-colors z-30 bg-white rounded-full p-1 shadow-md">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
+                <div class="p-5 md:p-8">
+                    <div class="mb-7 border-b border-gray-100 pb-5 pr-10">
+                        <span class="text-primary tracking-[0.2em] uppercase text-[10px] font-bold">IndCollection Bespoke Studio</span>
+                        <h3 class="text-2xl md:text-3xl font-serif font-bold text-dark mt-1">Formulir Konsultasi & Ukuran</h3>
+                        <p class="text-xs text-gray-500 mt-2 leading-relaxed">Disusun mengikuti formulir ukuran atelier IndCollection. Semua ukuran dalam sentimeter dan dapat dikonfirmasi ulang saat fitting.</p>
+                    </div>
+
+                    <form id="custom-dress-form" onsubmit="submitCustomOrder(event)" class="space-y-5">
+                        <!-- STEP 1 -->
+                        <section class="bespoke-section">
+                            <div class="bespoke-section-head p-4 flex items-center gap-3">
+                                <span class="bespoke-step">01</span>
+                                <div><h4 class="font-serif font-bold text-dark">Data Pelanggan & Jadwal</h4><p class="text-[10px] text-gray-500">Data yang sama akan masuk ke sheet Bespoke.</p></div>
+                            </div>
+                            <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Nama *</label><input type="text" id="cd-name" class="measure-input" required></div>
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">WhatsApp *</label><input type="tel" id="cd-wa" class="measure-input" placeholder="08xxxxxxxxxx" required></div>
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">BB & Tinggi</label><input type="text" id="cd-weight-height" class="measure-input" placeholder="55 kg / 160 cm"></div>
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Tanggal Masuk</label><input type="date" id="cd-intake-date" class="measure-input"></div>
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Tanggal Fitting</label><input type="date" id="cd-fitting-date" class="measure-input"></div>
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Tanggal Ambil</label><input type="date" id="cd-pickup-date" class="measure-input"></div>
+                            </div>
+                        </section>
+
+                        <!-- STEP 2 -->
+                        <section class="bespoke-section">
+                            <div class="bespoke-section-head p-4 flex items-center gap-3">
+                                <span class="bespoke-step">02</span>
+                                <div><h4 class="font-serif font-bold text-dark">Jenis Jahitan</h4><p class="text-[10px] text-gray-500">Harga diambil dari master price list IndCollection.</p></div>
+                            </div>
+                            <div class="p-4">
+                                <div id="bespoke-category-tabs" class="flex flex-wrap gap-2 mb-4"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-2" id="bespoke-main-price-list">
+                                    <p class="text-xs text-gray-400 col-span-full">Memuat master harga...</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- STEP 3 -->
+                        <section class="bespoke-section">
+                            <div class="bespoke-section-head p-4 flex items-center gap-3">
+                                <span class="bespoke-step">03</span>
+                                <div><h4 class="font-serif font-bold text-dark">Detail, Payet & Prioritas</h4><p class="text-[10px] text-gray-500">Tambahan bersifat opsional dan dihitung transparan.</p></div>
+                            </div>
+                            <div class="p-4 space-y-5">
+                                <div>
+                                    <label class="mini-badge text-primary">Tambahan Model / Detail</label>
+                                    <div id="bespoke-addon-list" class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2"></div>
+                                </div>
+                                <div>
+                                    <label class="mini-badge text-primary">Jasa Payet</label>
+                                    <div class="grid grid-cols-1 md:grid-cols-[1fr_110px] gap-3 mt-2">
+                                        <select id="cd-payet-code" onchange="calculateEstimasi()" class="w-full border border-gray-200 p-2 text-xs bg-white"><option value="">Tanpa jasa payet</option></select>
+                                        <input id="cd-payet-qty" type="number" min="1" value="1" onchange="calculateEstimasi()" class="border border-gray-200 p-2 text-xs" placeholder="Jumlah/spot">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="mini-badge text-primary">Charge Bahan Berpayet</label>
+                                    <select id="cd-beaded-charge" onchange="calculateEstimasi()" class="w-full border border-gray-200 p-2 text-xs mt-2"><option value="">Tidak ada</option></select>
+                                </div>
+                                <div>
+                                    <label class="mini-badge text-primary">Waktu Pengerjaan</label>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                                        <label class="border p-3 text-xs cursor-pointer"><input type="radio" name="cd-priority" value="regular" data-rate="0" checked onchange="calculateEstimasi()"> <b>Reguler</b><span class="block text-[9px] text-gray-500 mt-1">Menyesuaikan antrean</span></label>
+                                        <label class="border p-3 text-xs cursor-pointer"><input type="radio" name="cd-priority" value="express3" data-rate="25" onchange="calculateEstimasi()"> <b>Express 3 Hari</b><span class="block text-[9px] text-primary mt-1">+25% harga final</span></label>
+                                        <label class="border p-3 text-xs cursor-pointer"><input type="radio" name="cd-priority" value="express1" data-rate="50" onchange="calculateEstimasi()"> <b>Express 1 Hari</b><span class="block text-[9px] text-primary mt-1">+50% harga final</span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- STEP 4 -->
+                        <section class="bespoke-section">
+                            <div class="bespoke-section-head p-4 flex items-center gap-3">
+                                <span class="bespoke-step">04</span>
+                                <div><h4 class="font-serif font-bold text-dark">Ukuran Badan</h4><p class="text-[10px] text-gray-500">Mengikuti lembar ukur IndCollection.</p></div>
+                            </div>
+                            <div class="p-4 grid grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-4">
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Leher</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-neck" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Dada</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-chest" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Pinggang</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-waist" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Panggul</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-hip" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lebar Dada</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-chestWidth" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lebar Bahu</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-shoulder" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lebar Bahu Kecil</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-smallShoulder" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lebar Punggung</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-backWidth" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Punggung</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-backLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Blouse</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-blouseLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Muka</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-frontLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Tinggi Dada</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-bustHeight" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Sisi</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-sideLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Kebaya (dari bahu)</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-kebayaLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+                            </div>
+                        </section>
+
+                        <!-- STEP 5 -->
+                        <section class="bespoke-section">
+                            <div class="bespoke-section-head p-4 flex items-center gap-3">
+                                <span class="bespoke-step">05</span>
+                                <div><h4 class="font-serif font-bold text-dark">Ukuran Tangan</h4></div>
+                            </div>
+                            <div class="p-4 grid grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-4">
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Lengan</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-sleeveLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Kerung</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-armhole" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Lengan</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-upperArm" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Siku</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-elbow" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Pergelangan</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-wrist" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+                            </div>
+                        </section>
+
+                        <!-- STEP 6 -->
+                        <section class="bespoke-section">
+                            <div class="bespoke-section-head p-4 flex items-center gap-3">
+                                <span class="bespoke-step">06</span>
+                                <div><h4 class="font-serif font-bold text-dark">Ukuran Celana</h4><p class="text-[10px] text-gray-500">Isi bila model membutuhkan bawahan/celana.</p></div>
+                            </div>
+                            <div class="p-4 grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-4">
+                                <div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Panjang Pesak</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-riseLength" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Paha</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-thigh" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Lutut</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-knee" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+<div><label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500">Lingkar Kaki</label><div class="relative"><input type="number" step="0.1" min="0" id="cd-ankle" class="measure-input pr-7" placeholder="0"><span class="absolute right-1 bottom-2 text-[9px] text-gray-400">cm</span></div></div>
+                            </div>
+                        </section>
+
+                        <section class="bespoke-section p-4">
+                            <label class="block text-[9px] uppercase tracking-wider font-bold text-gray-500 mb-2">Catatan Model / Detail Desain</label>
+                            <textarea id="cd-notes" rows="4" placeholder="Contoh: kerah sabrina, lengan balon, warna, referensi detail, kebutuhan khusus..." class="w-full border border-gray-200 p-3 text-xs focus:border-gold outline-none"></textarea>
+                        </section>
+
+                        <button type="submit" class="lg:hidden w-full bg-dark text-gold px-4 py-4 uppercase tracking-widest text-xs font-bold shadow-xl">Kirim & Minta Penawaran</button>
+                    </form>
+                </div>
+
+                <!-- ESTIMATE SIDEBAR -->
+                <aside class="bg-dark text-white p-5 md:p-7">
+                    <div class="sticky-estimate">
+                        <span class="text-gold text-[9px] uppercase tracking-[.25em] font-bold">Live Estimate</span>
+                        <h3 class="font-serif text-xl text-white mt-1 mb-5 border-b border-gold/30 pb-4">Ringkasan Bespoke</h3>
+                        <div id="bespoke-estimate-lines" class="space-y-3 text-xs text-gray-300">
+                            <p class="text-gray-500">Pilih jenis jahitan untuk mulai menghitung.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-600">
+                            <div class="flex justify-between text-[10px] uppercase tracking-widest text-gray-400"><span>Estimasi</span><span id="bespoke-estimate-label">mulai dari</span></div>
+                            <p id="total-estimasi" class="text-3xl font-serif text-gold font-bold mt-1">Rp 0</p>
+                            <div class="flex justify-between mt-3 text-xs"><span class="text-gray-400">DP minimal 50%</span><b id="bespoke-dp-estimate" class="text-white">Rp 0</b></div>
+                        </div>
+                        <div class="mt-6 text-[10px] text-gray-400 leading-relaxed bg-white/5 p-3 border-l-2 border-gold">
+                            Harga merupakan estimasi awal. Harga final dapat berubah sesuai kerumitan desain, material, detail, dan hasil konsultasi. Bahan dari customer. Revisi minor maksimal 1x.
+                        </div>
+                        <button onclick="document.getElementById('custom-dress-form').requestSubmit()" class="hidden lg:block w-full bg-gold text-dark px-4 py-4 hover:bg-white transition-colors uppercase tracking-widest text-xs font-bold shadow-lg mt-7">
+                            Kirim ke Desainer
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PROMO: mengikuti bahasa visual form admin awal -->
+    <div id="modal-promo" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-modal-pop shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-10 px-8 py-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 id="promo-modal-title" class="text-xl font-serif font-bold text-primary">Tambah Promo</h3>
+                <button onclick="closeModal('modal-promo')" class="text-gray-400 hover:text-primary">X</button>
+            </div>
+            <form id="promo-form" onsubmit="submitPromo(event)" class="p-8">
+                <input type="hidden" id="promo-mode" value="add"><input type="hidden" id="promo-id">
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="col-span-2"><label class="block text-xs font-bold uppercase tracking-wider mb-1">Nama Promo *</label><input id="promo-name" class="w-full border-b p-2" required></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Kode Voucher</label><input id="promo-code" class="w-full border-b p-2 uppercase" placeholder="Kosong = otomatis"></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Jenis *</label><select id="promo-type" class="w-full border-b p-2"><option value="percent">Persentase (%)</option><option value="nominal">Nominal (Rp)</option></select></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Nilai *</label><input id="promo-value" type="number" min="0" class="w-full border-b p-2" required></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Minimal Transaksi</label><input id="promo-min" type="number" min="0" value="0" class="w-full border-b p-2"></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Mulai *</label><input id="promo-start" type="date" class="w-full border-b p-2" required></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Berakhir *</label><input id="promo-end" type="date" class="w-full border-b p-2" required></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Target</label><select id="promo-scope" class="w-full border-b p-2" onchange="togglePromoTarget()"><option value="all">Semua Produk</option><option value="category">Kategori</option><option value="product">Produk</option></select></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Target ID/Kategori</label><input id="promo-target" class="w-full border-b p-2" placeholder="wisuda / KB001"></div>
+                    <div class="col-span-2"><label class="block text-xs font-bold uppercase tracking-wider mb-1">Status</label><select id="promo-active" class="w-full border-b p-2"><option value="true">Aktif</option><option value="false">Nonaktif</option></select></div>
+                </div>
+                <button class="w-full bg-primary text-white px-4 py-4 mt-7 hover:bg-primaryDark transition uppercase tracking-widest text-sm font-bold">Simpan Promo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PEMBAYARAN -->
+    <div id="modal-payment" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-xl max-h-[90vh] overflow-y-auto animate-modal-pop shadow-2xl relative">
+            <div class="px-8 py-5 border-b flex justify-between"><h3 class="text-xl font-serif font-bold text-primary">Pembayaran & Diskon</h3><button onclick="closeModal('modal-payment')" class="text-gray-400">X</button></div>
+            <form onsubmit="submitPayment(event)" class="p-8">
+                <input id="payment-order-id" type="hidden"><div id="payment-order-summary" class="bg-gray-50 border p-4 mb-5 text-sm"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Diskon</label><select id="payment-discount-type" class="w-full border p-2"><option value="none">Tanpa Diskon</option><option value="percent">Persentase</option><option value="nominal">Nominal</option></select></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Nilai Diskon</label><input id="payment-discount-value" type="number" min="0" value="0" class="w-full border p-2"></div>
+                    <div class="col-span-2"><label class="block text-xs font-bold uppercase tracking-wider mb-1">Alasan Diskon</label><input id="payment-discount-reason" class="w-full border p-2" placeholder="Contoh: Repeat customer / Event"></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Nominal Bayar *</label><input id="payment-amount" type="number" min="0" class="w-full border p-2" required></div>
+                    <div><label class="block text-xs font-bold uppercase tracking-wider mb-1">Metode</label><select id="payment-method" class="w-full border p-2"><option>Transfer</option><option>QRIS</option><option>Cash</option><option>EDC</option></select></div>
+                    <div class="col-span-2"><label class="block text-xs font-bold uppercase tracking-wider mb-1">Bukti Pembayaran</label><input id="payment-proof" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="w-full border p-2 text-xs"><p class="text-[9px] text-gray-400 mt-1">Opsional. File akan disimpan ke Google Drive / Payment Proofs dan URL dicatat pada sheet Payments.</p><p id="payment-upload-status" class="text-[10px] text-primary font-bold mt-1"></p></div>
+                    <div class="col-span-2"><label class="block text-xs font-bold uppercase tracking-wider mb-1">Catatan</label><input id="payment-notes" class="w-full border p-2"></div>
+                </div>
+                <button id="payment-submit-btn" class="w-full bg-primary text-white p-3 mt-6 font-bold uppercase tracking-widest text-xs">Simpan Pembayaran</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL WHATSAPP PREVIEW -->
+    <div id="modal-wa-preview" class="hide fixed inset-0 z-[70] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-xl animate-modal-pop shadow-2xl relative p-8">
+            <button onclick="closeModal('modal-wa-preview')" class="absolute top-4 right-4 text-gray-400">X</button>
+            <h3 class="text-xl font-serif font-bold text-primary mb-2">Pesan WhatsApp Otomatis</h3>
+            <p class="text-xs text-gray-500 mb-4">Teks dapat diperiksa atau disalin sebelum membuka WhatsApp.</p>
+            <textarea id="wa-preview-text" rows="13" class="w-full border p-3 text-sm bg-gray-50"></textarea>
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <button onclick="copyWAText()" class="border border-dark text-dark p-3 text-xs uppercase font-bold">Salin Teks</button>
+                <button onclick="openWAFromPreview()" class="bg-green-600 text-white p-3 text-xs uppercase font-bold">Buka WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RIWAYAT PELANGGAN BERDASARKAN WHATSAPP -->
+    <div id="modal-customer-history" class="hide fixed inset-0 z-[75] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-3xl max-h-[88vh] overflow-y-auto animate-modal-pop shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-sm px-8 py-5 border-b flex justify-between items-center z-10"><h3 id="customer-history-title" class="text-xl font-serif font-bold text-primary">Riwayat Pelanggan</h3><button onclick="closeModal('modal-customer-history')" class="text-gray-400">X</button></div>
+            <div id="customer-history-content" class="p-8"></div>
+        </div>
+    </div>
+
+
+    <!-- MODAL MASTER HARGA BESPOKE -->
+    <div id="modal-bespoke-price" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-xl max-h-[90vh] overflow-y-auto animate-modal-pop shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 px-7 py-5 border-b flex justify-between items-center">
+                <h3 class="font-serif font-bold text-primary" id="bespoke-price-modal-title">Tambah Harga Bespoke</h3>
+                <button onclick="closeModal('modal-bespoke-price')" class="text-gray-400">X</button>
+            </div>
+            <form id="bespoke-price-form" onsubmit="submitBespokePrice(event)" class="p-7 grid grid-cols-2 gap-4">
+                <input type="hidden" id="bp-code">
+                <div><label class="mini-badge text-gray-500">Kategori *</label><select id="bp-category" class="w-full border p-2 text-xs mt-1" required><option>Atasan</option><option>Dress</option><option>Rok</option><option>Kemeja & Celana</option><option>Jasa Payet</option><option>Charge Bahan Berpayet</option><option>Tambahan Model / Detail</option><option>Alter / Perombakan</option></select></div>
+                <div><label class="mini-badge text-gray-500">Kode</label><input id="bp-code-input" class="w-full border p-2 text-xs mt-1" placeholder="otomatis bila kosong"></div>
+                <div class="col-span-2"><label class="mini-badge text-gray-500">Nama Item *</label><input id="bp-item" class="w-full border p-2 text-xs mt-1" required></div>
+                <div><label class="mini-badge text-gray-500">Harga Minimum</label><input id="bp-min" type="number" min="0" class="w-full border p-2 text-xs mt-1"></div>
+                <div><label class="mini-badge text-gray-500">Harga Maksimum</label><input id="bp-max" type="number" min="0" class="w-full border p-2 text-xs mt-1"></div>
+                <div><label class="mini-badge text-gray-500">Unit</label><input id="bp-unit" class="w-full border p-2 text-xs mt-1" placeholder="pcs / spot / m"></div>
+                <div><label class="mini-badge text-gray-500">Tipe Kalkulasi</label><select id="bp-calc" class="w-full border p-2 text-xs mt-1"><option value="base">Base</option><option value="addon">Add-on</option><option value="payet">Payet</option><option value="charge">Charge</option><option value="alter">Alter</option></select></div>
+                <div class="col-span-2"><label class="mini-badge text-gray-500">Catatan</label><input id="bp-note" class="w-full border p-2 text-xs mt-1"></div>
+                <label class="col-span-2 text-xs"><input id="bp-active" type="checkbox" checked> Aktif ditampilkan</label>
+                <button class="col-span-2 bg-primary text-white p-3 uppercase tracking-widest text-xs font-bold">Simpan Master Harga</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- MODAL DETAIL UKURAN BESPOKE -->
+    <div id="modal-bespoke-detail" class="hide fixed inset-0 z-[60] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <div class="sticky top-0 bg-white border-b p-5 flex justify-between items-center z-10"><div><span class="mini-badge text-primary">Measurement Card</span><h3 id="bespoke-detail-title" class="font-serif font-bold text-xl">Detail Ukuran</h3></div><button onclick="closeModal('modal-bespoke-detail')" class="text-gray-400">X</button></div>
+            <div id="bespoke-detail-content" class="p-6"></div>
+        </div>
+    </div>
+
+    <!-- MODAL SUKSES -->
+    <div id="modal-success" class="hide fixed inset-0 z-[60] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-sm text-center p-8 animate-modal-pop border-t-4 border-gold shadow-2xl">
+            <h3 class="text-2xl font-serif font-bold text-dark mb-3" id="success-title">Berhasil</h3>
+            <p class="text-gray-600 text-sm mb-8 leading-relaxed" id="success-desc">Tindakan selesai.</p>
+            <div class="space-y-3" id="success-actions"></div>
+        </div>
+    </div>
+
+
+    <script>
+// ================================================================
+// INDCOLLECTION - FUNCTIONAL ENGINE V4
+// Tampilan publik tetap mengikuti desain awal. V4 hanya menambah mesin:
+// Sheet DB, Drive upload, booking, promo, pembayaran, history, calendar,
+// reminder, denda keterlambatan, PDF + QR, dan admin CRUD.
+// ================================================================
+
+// GANTI dengan URL Web App Apps Script setelah IndCollection_Code_V4.gs di-deploy.
+const API_URL = 'PASTE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+const STORE_WA = '6281220007780';
+const API_READY = () => API_URL && !API_URL.includes('PASTE_GOOGLE');
+const LS_KEY = 'indcollection_v4_public_cache';
+const LS_LOCAL_ORDERS = 'indcollection_v4_local_orders';
+const TOKEN_KEY = 'indcollection_admin_token';
+
+const DEFAULT_PRODUCTS = [
+    { id:'KB001', name:'Kebaya Wisuda Modern Ruby', category:'wisuda', price:175000, comparePrice:0, deposit:100000, cleaningFee:0, available:true, inventoryCode:'INV-RUBY-01', size:'M/L', color:'Ruby', location:'Rak A1', condition:'Baik', lateFeePerDay:50000, description:'', images:[
+        'https://images.unsplash.com/photo-1610484518382-748a80d563be?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80',
+        'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+    ], imageFileIds:['','','']},
+    { id:'KB002', name:'Royal White Wedding Dress', category:'pengantin', price:850000, comparePrice:0, deposit:250000, cleaningFee:50000, available:true, inventoryCode:'INV-WHITE-01', size:'M', color:'White', location:'Rak B1', condition:'Baik', lateFeePerDay:100000, description:'', images:[
+        'https://images.unsplash.com/photo-1588667635956-613b5e43a9a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'
+    ], imageFileIds:['','','']}
+];
+
+let catalogData = [];
+let orderData = [];
+let customOrderData = [];
+let promoData = [];
+const DEFAULT_BESPOKE_PRICING = [
+{code:'AT001',category:'Atasan',item:'Atasan Polos (Pendek)',priceMin:175000,priceMax:175000,unit:'pcs',calcType:'base',active:true,sortOrder:10,note:''},
+{code:'AT002',category:'Atasan',item:'Atasan Kebaya (Pendek)',priceMin:200000,priceMax:200000,unit:'pcs',calcType:'base',active:true,sortOrder:20,note:''},
+{code:'AT003',category:'Atasan',item:'Atasan Polos (Tunik)',priceMin:200000,priceMax:200000,unit:'pcs',calcType:'base',active:true,sortOrder:30,note:''},
+{code:'AT004',category:'Atasan',item:'Atasan Kebaya (Tunik)',priceMin:250000,priceMax:250000,unit:'pcs',calcType:'base',active:true,sortOrder:40,note:''},
+{code:'AT005',category:'Atasan',item:'Atasan Polos (Panjang)',priceMin:225000,priceMax:225000,unit:'pcs',calcType:'base',active:true,sortOrder:50,note:''},
+{code:'AT006',category:'Atasan',item:'Atasan Kebaya (Panjang)',priceMin:275000,priceMax:275000,unit:'pcs',calcType:'base',active:true,sortOrder:60,note:''},
+{code:'DR001',category:'Dress',item:'Dress Polos Simple',priceMin:250000,priceMax:250000,unit:'pcs',calcType:'base',active:true,sortOrder:70,note:''},
+{code:'DR002',category:'Dress',item:'Dress Polos Design Khusus',priceMin:300000,priceMax:450000,unit:'pcs',calcType:'base',active:true,sortOrder:80,note:'Harga final mengikuti desain'},
+{code:'DR003',category:'Dress',item:'Dress Kombinasi Simple',priceMin:300000,priceMax:300000,unit:'pcs',calcType:'base',active:true,sortOrder:90,note:''},
+{code:'DR004',category:'Dress',item:'Dress Kombinasi Premium / Couture',priceMin:350000,priceMax:500000,unit:'pcs',calcType:'base',active:true,sortOrder:100,note:'Harga final mengikuti tingkat detail'},
+{code:'DR005',category:'Dress',item:'Kamisol',priceMin:180000,priceMax:200000,unit:'pcs',calcType:'base',active:true,sortOrder:110,note:''},
+{code:'DR006',category:'Dress',item:'Dress Anak',priceMin:200000,priceMax:350000,unit:'pcs',calcType:'base',active:true,sortOrder:120,note:''},
+{code:'RK001',category:'Rok',item:'Rok Satin Polos',priceMin:125000,priceMax:125000,unit:'pcs',calcType:'base',active:true,sortOrder:130,note:''},
+{code:'RK002',category:'Rok',item:'Rok Kombinasi Lilit / Span',priceMin:150000,priceMax:150000,unit:'pcs',calcType:'base',active:true,sortOrder:140,note:''},
+{code:'RK003',category:'Rok',item:'Rok Circle / Duyung',priceMin:150000,priceMax:150000,unit:'pcs',calcType:'base',active:true,sortOrder:150,note:''},
+{code:'RK004',category:'Rok',item:'Rok Design Khusus / Kombinasi',priceMin:200000,priceMax:300000,unit:'pcs',calcType:'base',active:true,sortOrder:160,note:''},
+{code:'KC001',category:'Kemeja & Celana',item:'Kemeja Anak',priceMin:200000,priceMax:200000,unit:'pcs',calcType:'base',active:true,sortOrder:170,note:''},
+{code:'KC002',category:'Kemeja & Celana',item:'Kemeja Dewasa',priceMin:250000,priceMax:250000,unit:'pcs',calcType:'base',active:true,sortOrder:180,note:''},
+{code:'KC003',category:'Kemeja & Celana',item:'Celana',priceMin:200000,priceMax:200000,unit:'pcs',calcType:'base',active:true,sortOrder:190,note:''},
+{code:'PY001',category:'Jasa Payet',item:'Payet Mutiara',priceMin:100000,priceMax:100000,unit:'spot',calcType:'payet',active:true,sortOrder:210,note:''},
+{code:'PY002',category:'Jasa Payet',item:'Payet Mutiara Mix Diamond',priceMin:150000,priceMax:150000,unit:'spot',calcType:'payet',active:true,sortOrder:220,note:''},
+{code:'PY003',category:'Jasa Payet',item:'Payet Mix Jepang',priceMin:200000,priceMax:200000,unit:'spot',calcType:'payet',active:true,sortOrder:230,note:''},
+{code:'PY004',category:'Jasa Payet',item:'Payet Simple',priceMin:300000,priceMax:300000,unit:'paket 3 spot',calcType:'payet',active:true,sortOrder:240,note:'Harga per paket 3 spot'},
+{code:'PY005',category:'Jasa Payet',item:'Payet Semi Detail',priceMin:650000,priceMax:650000,unit:'paket 3 spot',calcType:'payet',active:true,sortOrder:250,note:'Harga per paket 3 spot'},
+{code:'PY006',category:'Jasa Payet',item:'Payet Request',priceMin:0,priceMax:0,unit:'desain',calcType:'payet',active:true,sortOrder:260,note:'Menyesuaikan desain'},
+{code:'CB001',category:'Charge Bahan Berpayet',item:'Bahan Berpayet - Pendek',priceMin:100000,priceMax:100000,unit:'pcs',calcType:'charge',active:true,sortOrder:270,note:''},
+{code:'CB002',category:'Charge Bahan Berpayet',item:'Bahan Berpayet - Tunik',priceMin:150000,priceMax:150000,unit:'pcs',calcType:'charge',active:true,sortOrder:280,note:''},
+{code:'CB003',category:'Charge Bahan Berpayet',item:'Bahan Berpayet - Panjang',priceMin:200000,priceMax:200000,unit:'pcs',calcType:'charge',active:true,sortOrder:290,note:''},
+{code:'AD001',category:'Tambahan Model / Detail',item:'Kamisol Tambahan',priceMin:180000,priceMax:200000,unit:'pcs',calcType:'addon',active:true,sortOrder:310,note:''},
+{code:'AD002',category:'Tambahan Model / Detail',item:'Furring Herro',priceMin:20000,priceMax:20000,unit:'meter',calcType:'addon',active:true,sortOrder:320,note:'Harga per meter'},
+{code:'AD003',category:'Tambahan Model / Detail',item:'Resleting Jepang 60 cm',priceMin:15000,priceMax:15000,unit:'pcs',calcType:'addon',active:true,sortOrder:330,note:''},
+{code:'AD004',category:'Tambahan Model / Detail',item:'Resleting Wudhu',priceMin:10000,priceMax:10000,unit:'pcs',calcType:'addon',active:true,sortOrder:340,note:''},
+{code:'AD005',category:'Tambahan Model / Detail',item:'Resleting Busui',priceMin:10000,priceMax:10000,unit:'pcs',calcType:'addon',active:true,sortOrder:350,note:''},
+{code:'AD006',category:'Tambahan Model / Detail',item:'Obi / Belt',priceMin:25000,priceMax:25000,unit:'pcs',calcType:'addon',active:true,sortOrder:360,note:'Mulai dari'},
+{code:'AD007',category:'Tambahan Model / Detail',item:'Layer / Ruffle',priceMin:50000,priceMax:100000,unit:'pcs',calcType:'addon',active:true,sortOrder:370,note:''},
+{code:'AD008',category:'Tambahan Model / Detail',item:'Drapery / Kerutan Detail',priceMin:0,priceMax:0,unit:'desain',calcType:'addon',active:true,sortOrder:380,note:'Menyesuaikan model'}
+];
+let activeBespokeCategory='Atasan';
+let bespokePricingData = [];
+let paymentData = [];
+let reminderData = [];
+let currentSlideIndex = {};
+let estimasiSaatIni = 280000;
+let waPreviewPhone = STORE_WA;
+let waPreviewReminderId = '';
+let activeCatalogFilter = 'semua';
+let calendarCursor = new Date();
+calendarCursor.setDate(1);
+
+const HARGA_BASIC = 280000, HARGA_KAIN = 200000, HARGA_PAYET_RINGAN = 150000, HARGA_PAYET_FULL = 450000, HARGA_FURING = 100000;
+
+// ---------- UTIL ----------
+function updateClock() {
+    const now = new Date();
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} WIB`;
+    const el = document.getElementById('realtime-clock');
+    if(el) el.innerHTML = `<span class="hidden sm:inline">${dateStr} | </span><span class="text-gold font-bold">${timeStr}</span>`;
+}
+setInterval(updateClock,1000);
+
+function formatRupiah(angka) { return 'Rp ' + Number(angka || 0).toLocaleString('id-ID'); }
+function escapeHtml(v='') { return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function normalizeWA(v='') { let x=String(v).replace(/\D/g,''); if(x.startsWith('0')) x='62'+x.slice(1); if(x && !x.startsWith('62')) x='62'+x; return x; }
+function parseDateLocal(s){ if(!s) return null; const p=String(s).slice(0,10).split('-').map(Number); if(p.length!==3)return null; return new Date(p[0],p[1]-1,p[2]); }
+function localISODate(d=new Date()){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function dateID(s) { const d=parseDateLocal(s); return d ? d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '-'; }
+function dateShortID(s){ const d=parseDateLocal(s); return d ? d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}) : '-'; }
+function addDaysISO(s,days){ const d=parseDateLocal(s); if(!d)return''; d.setDate(d.getDate()+days); return localISODate(d); }
+function nowISODate(){ return localISODate(new Date()); }
+function makeLocalId(prefix){ const d=new Date(); return `${prefix}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(Date.now()).slice(-6)}`; }
+function getToken(){ return sessionStorage.getItem(TOKEN_KEY)||''; }
+function savePublicCache(){ localStorage.setItem(LS_KEY, JSON.stringify({products:catalogData,promos:promoData,bespokePricing:bespokePricingData})); }
+function loadPublicCache(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch(e){ return {}; } }
+function saveLocalOrders(){ if(!API_READY()) localStorage.setItem(LS_LOCAL_ORDERS,JSON.stringify(orderData)); }
+function loadLocalOrders(){ try{return JSON.parse(localStorage.getItem(LS_LOCAL_ORDERS)||'[]');}catch(e){return[];} }
+
+async function api(action, data={}, protectedAction=false){
+    if(!API_READY()) throw new Error('API_NOT_CONFIGURED');
+    const payload = {action, data, token: protectedAction ? getToken() : ''};
+    const body = new URLSearchParams({payload:JSON.stringify(payload)});
+    const res = await fetch(API_URL,{method:'POST',body,redirect:'follow'});
+    if(!res.ok) throw new Error('HTTP_'+res.status);
+    const out = await res.json();
+    if(!out.ok) throw new Error(out.error || 'API_ERROR');
+    return out;
+}
+
+async function bootstrap(){
+    const cache = loadPublicCache();
+    catalogData = cache.products?.length ? cache.products : [...DEFAULT_PRODUCTS];
+    promoData = cache.promos || [];
+    bespokePricingData = cache.bespokePricing?.length ? cache.bespokePricing : [...DEFAULT_BESPOKE_PRICING];
+    orderData = loadLocalOrders();
+    if(API_READY()){
+        try{
+            const out = await api('bootstrap');
+            catalogData = out.products || catalogData;
+            promoData = out.promos || [];
+            bespokePricingData = out.bespokePricing || bespokePricingData;
+            savePublicCache();
+        }catch(err){ console.warn('Bootstrap API gagal, cache lokal dipakai:',err.message); }
+    }
+    renderCatalog(activeCatalogFilter);
+    updateClock();
+}
+
+function closeMobileMenu(){ document.getElementById('mobile-menu')?.classList.add('hide'); }
+function navigate(viewId){
+    document.querySelectorAll('.view-section').forEach(el=>el.classList.add('hide'));
+    document.getElementById(`view-${viewId}`)?.classList.remove('hide');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(viewId==='catalog') renderCatalog(activeCatalogFilter);
+}
+function openModal(id){ document.getElementById(id)?.classList.remove('hide'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id)?.classList.add('hide'); document.body.style.overflow='auto'; }
+function showSuccessAlert(title,desc,btns){ document.getElementById('success-title').innerText=title; document.getElementById('success-desc').innerHTML=desc; document.getElementById('success-actions').innerHTML=btns; openModal('modal-success'); }
+
+// ---------- PRICING / PROMO ----------
+function isPromoActive(p, product, voucher=''){
+    if(!p || String(p.active).toLowerCase()==='false') return false;
+    const today=nowISODate(); if(p.startDate && today<p.startDate) return false; if(p.endDate && today>p.endDate) return false;
+    const code=(p.code||'').trim().toUpperCase();
+    if(code && code !== String(voucher||'').trim().toUpperCase()) return false;
+    if(p.scope==='category' && String(p.target||'').toLowerCase()!==String(product.category||'').toLowerCase()) return false;
+    if(p.scope==='product' && String(p.target||'')!==String(product.id||'')) return false;
+    return true;
+}
+function priceQuote(product,voucher=''){
+    const base=Number(product.price||0), cleaning=Number(product.cleaningFee||0), deposit=Number(product.deposit||0);
+    let promo=null, discount=0;
+    promoData.filter(p=>isPromoActive(p,product,voucher) && base>=Number(p.minTransaction||0)).forEach(p=>{
+        const disc=p.type==='percent' ? Math.round(base*Number(p.value||0)/100) : Number(p.value||0);
+        if(disc>discount){discount=Math.min(base,disc);promo=p;}
+    });
+    return {base,cleaning,deposit,promo,discount,subtotal:base+cleaning+deposit,total:Math.max(0,base+cleaning+deposit-discount)};
+}
+function catalogPriceHtml(item){
+    const q=priceQuote(item,''), compare=Number(item.comparePrice||0);
+    if(q.promo){
+        const normal=compare>q.base?compare:q.base;
+        return `<span class="text-gray-400 line-through text-xs mr-2">${formatRupiah(normal)}</span><span class="text-primary font-semibold text-sm">${formatRupiah(q.base-q.discount)}</span><div class="text-[9px] uppercase tracking-widest text-gold font-bold mt-1">${escapeHtml(q.promo.name)}</div>`;
+    }
+    if(compare>q.base) return `<span class="text-gray-400 line-through text-xs mr-2">${formatRupiah(compare)}</span><span class="text-primary font-semibold text-sm">${formatRupiah(q.base)}</span>`;
+    return `<span class="text-primary font-semibold text-sm">${formatRupiah(q.base)}</span>`;
+}
+
+// ---------- BESPOKE STUDIO V5 ----------
+const MEASUREMENT_FIELDS = {
+    neck:'Lingkar Leher', chest:'Lingkar Dada', waist:'Lingkar Pinggang', hip:'Lingkar Panggul',
+    chestWidth:'Lebar Dada', shoulder:'Lebar Bahu', smallShoulder:'Lebar Bahu Kecil', backWidth:'Lebar Punggung',
+    backLength:'Panjang Punggung', blouseLength:'Panjang Blouse', frontLength:'Panjang Muka', bustHeight:'Tinggi Dada',
+    sideLength:'Panjang Sisi', kebayaLength:'Panjang Kebaya', sleeveLength:'Panjang Lengan', armhole:'Lingkar Kerung',
+    upperArm:'Lingkar Lengan', elbow:'Lingkar Siku', wrist:'Lingkar Pergelangan', riseLength:'Panjang Pesak',
+    thigh:'Lingkar Paha', knee:'Lingkar Lutut', ankle:'Lingkar Kaki'
+};
+let currentBespokeEstimate = {base:0,addons:0,payet:0,charge:0,priority:0,total:0,minOnly:false,selected:null};
+
+function priceRangeText(p){
+    const min=Number(p.priceMin||0),max=Number(p.priceMax||0);
+    if(max>min) return `${formatRupiah(min)} - ${formatRupiah(max)}`;
+    return formatRupiah(min);
+}
+function openCustomDressModal(){
+    renderBespokePricingForm();
+    calculateEstimasi();
+    openModal('modal-custom-dress');
+}
+function renderBespokePricingForm(){
+    const all=(bespokePricingData?.length?bespokePricingData:DEFAULT_BESPOKE_PRICING).filter(x=>x.active!==false);
+    const base=all.filter(x=>x.calcType==='base');
+    const addons=all.filter(x=>x.calcType==='addon');
+    const payet=all.filter(x=>x.calcType==='payet');
+    const charges=all.filter(x=>x.calcType==='charge');
+    const cats=[...new Set(base.map(x=>x.category))];
+    if(!cats.includes(activeBespokeCategory))activeBespokeCategory=cats[0]||'Atasan';
+    const tabs=document.getElementById('bespoke-category-tabs');
+    if(tabs)tabs.innerHTML=cats.map(c=>`<button type="button" onclick="selectBespokeCategory('${escapeHtml(c).replace(/'/g,"\\'")}')" class="${c===activeBespokeCategory?'bg-primary text-white border-primary':'bg-white text-dark border-gray-200'} border px-4 py-2 text-[10px] uppercase tracking-widest font-bold">${escapeHtml(c)}</button>`).join('');
+    const shown=base.filter(x=>x.category===activeBespokeCategory);
+    const main=document.getElementById('bespoke-main-price-list');
+    if(main){
+        main.innerHTML=shown.length?shown.map((p,i)=>`<div><input class="price-choice hidden" type="radio" name="cd-main-price" id="price-${escapeHtml(p.code)}" value="${escapeHtml(p.code)}" onchange="calculateEstimasi()"><label for="price-${escapeHtml(p.code)}" class="block border border-gray-200 p-3 cursor-pointer transition"><div class="flex justify-between gap-3"><div><span class="mini-badge text-primary">${escapeHtml(p.category)}</span><div class="text-xs font-bold text-dark mt-1">${escapeHtml(p.item)}</div>${p.note?`<div class="text-[9px] text-gray-400 mt-1">${escapeHtml(p.note)}</div>`:''}</div><div class="text-right text-xs font-bold text-primary whitespace-nowrap">${priceRangeText(p)}</div></div></label></div>`).join(''):'<p class="text-xs text-gray-400">Tidak ada item aktif pada kategori ini.</p>';
+    }
+    const add=document.getElementById('bespoke-addon-list');
+    if(add) add.innerHTML=addons.map(p=>`<div class="border border-gray-200 p-3"><label class="text-xs cursor-pointer flex justify-between gap-3"><span><input type="checkbox" class="cd-addon mr-2" value="${escapeHtml(p.code)}" onchange="calculateEstimasi()">${escapeHtml(p.item)}</span><b class="text-primary whitespace-nowrap">${priceRangeText(p)}${p.unit==='meter'?'/m':''}</b></label>${p.unit==='meter'?`<div class="mt-2 flex items-center gap-2"><span class="text-[9px] text-gray-400 uppercase">Panjang</span><input type="number" min="0.5" step="0.5" value="1" data-addon-qty="${escapeHtml(p.code)}" onchange="calculateEstimasi()" class="border p-1 w-20 text-xs"><span class="text-[9px] text-gray-400">meter</span></div>`:''}${p.note?`<div class="text-[9px] text-gray-400 mt-1">${escapeHtml(p.note)}</div>`:''}</div>`).join('');
+    const ps=document.getElementById('cd-payet-code');
+    if(ps){ps.innerHTML='<option value="">Tanpa jasa payet</option>'+payet.map(p=>`<option value="${escapeHtml(p.code)}">${escapeHtml(p.item)} — ${priceRangeText(p)}${p.unit?' / '+escapeHtml(p.unit):''}</option>`).join('');}
+    const cs=document.getElementById('cd-beaded-charge');
+    if(cs){cs.innerHTML='<option value="">Tidak ada</option>'+charges.map(p=>`<option value="${escapeHtml(p.code)}">${escapeHtml(p.item)} — ${priceRangeText(p)}</option>`).join('');}
+}
+function selectBespokeCategory(category){activeBespokeCategory=category;renderBespokePricingForm();calculateEstimasi();}
+function getBespokePrice(code){return (bespokePricingData||[]).find(x=>String(x.code)===String(code));}
+function calculateEstimasi(){
+    const selectedCode=document.querySelector('input[name="cd-main-price"]:checked')?.value||'';
+    const selected=getBespokePrice(selectedCode);
+    let base=Number(selected?.priceMin||0), minOnly=Number(selected?.priceMax||0)>base;
+    let addons=0, payetAmount=0, charge=0;
+    const lines=[];
+    if(selected) lines.push({name:selected.item,amount:base,range:minOnly});
+
+    document.querySelectorAll('.cd-addon:checked').forEach(el=>{
+        const p=getBespokePrice(el.value); if(!p)return;
+        const qtyEl=document.querySelector(`[data-addon-qty="${CSS.escape(p.code)}"]`);
+        const qty=p.unit==='meter'?Math.max(.5,Number(qtyEl?.value||1)):1;
+        const amount=Number(p.priceMin||0)*qty; addons+=amount; lines.push({name:`${p.item}${p.unit==='meter'?` × ${qty} m`:''}`,amount,range:Number(p.priceMax||0)>Number(p.priceMin||0)});
+    });
+    const payet=getBespokePrice(document.getElementById('cd-payet-code')?.value||'');
+    if(payet){
+        const qty=Math.max(1,Number(document.getElementById('cd-payet-qty')?.value||1));
+        const amount=Number(payet.priceMin||0)*qty; payetAmount+=amount;
+        lines.push({name:`${payet.item} × ${qty}${payet.unit?' '+payet.unit:''}`,amount,range:Number(payet.priceMax||0)>Number(payet.priceMin||0)});
+    }
+    const ch=getBespokePrice(document.getElementById('cd-beaded-charge')?.value||'');
+    if(ch){charge=Number(ch.priceMin||0);lines.push({name:ch.item,amount:charge,range:Number(ch.priceMax||0)>charge});}
+
+    const subtotal=base+addons+payetAmount+charge;
+    const priority=document.querySelector('input[name="cd-priority"]:checked');
+    const rate=Number(priority?.dataset.rate||0);
+    const priorityAmount=Math.round(subtotal*rate/100);
+    if(rate)lines.push({name:`${priority.value==='express3'?'Express 3 Hari':'Express 1 Hari'} (+${rate}%)`,amount:priorityAmount});
+    const total=subtotal+priorityAmount;
+    currentBespokeEstimate={base,addons,payet:payetAmount,charge,priority:priorityAmount,priorityRate:rate,total,minOnly,selected,lines};
+
+    const box=document.getElementById('bespoke-estimate-lines');
+    if(box)box.innerHTML=lines.length?lines.map(l=>`<div class="flex justify-between gap-3"><span>${escapeHtml(l.name)}</span><span class="${l.range?'text-goldLight':'text-white'} font-medium whitespace-nowrap">${l.range?'mulai ':''}${formatRupiah(l.amount)}</span></div>`).join(''):'<p class="text-gray-500">Pilih jenis jahitan untuk mulai menghitung.</p>';
+    const totalEl=document.getElementById('total-estimasi'); if(totalEl)totalEl.textContent=(minOnly?'Mulai ':'')+formatRupiah(total);
+    const dp=document.getElementById('bespoke-dp-estimate');if(dp)dp.textContent=(minOnly?'Mulai ':'')+formatRupiah(Math.round(total*.5));
+    const lab=document.getElementById('bespoke-estimate-label');if(lab)lab.textContent=minOnly?'estimasi minimum':'estimasi';
+    estimasiSaatIni=total;
+}
+function collectMeasurements(){
+    const out={};
+    Object.keys(MEASUREMENT_FIELDS).forEach(k=>{const el=document.getElementById('cd-'+k);out[k]=el&&el.value!==''?Number(el.value):0;});
+    return out;
+}
+async function submitCustomOrder(e){
+    e.preventDefault();
+    if(!currentBespokeEstimate.selected){alert('Silakan pilih jenis jahitan.');return;}
+    const addons=[...document.querySelectorAll('.cd-addon:checked')].map(x=>x.value); const addonQuantities={};addons.forEach(code=>{const p=getBespokePrice(code),el=document.querySelector(`[data-addon-qty="${CSS.escape(code)}"]`);addonQuantities[code]=p?.unit==='meter'?Math.max(.5,Number(el?.value||1)):1;});
+    const priority=document.querySelector('input[name="cd-priority"]:checked');
+    const obj={
+        id:makeLocalId('BSP'), createdAt:new Date().toISOString(),
+        name:document.getElementById('cd-name').value.trim(), wa:normalizeWA(document.getElementById('cd-wa').value),
+        weightHeight:document.getElementById('cd-weight-height').value.trim(),
+        intakeDate:document.getElementById('cd-intake-date').value, fittingDate:document.getElementById('cd-fitting-date').value, pickupDate:document.getElementById('cd-pickup-date').value,
+        pricingCode:currentBespokeEstimate.selected.code, pricingItem:currentBespokeEstimate.selected.item, basePrice:currentBespokeEstimate.base,
+        addonCodes:addons, addonQuantities, payetCode:document.getElementById('cd-payet-code').value, payetQty:Number(document.getElementById('cd-payet-qty').value||1),
+        beadedChargeCode:document.getElementById('cd-beaded-charge').value,
+        priority:priority?.value||'regular', priorityRate:Number(priority?.dataset.rate||0),
+        measurements:collectMeasurements(), notes:document.getElementById('cd-notes').value.trim(),
+        estimate:currentBespokeEstimate.total, dpEstimate:Math.round(currentBespokeEstimate.total*.5), status:'Lead'
+    };
+    try{
+        let saved=obj;
+        if(API_READY()){const out=await api('createBespoke',obj);saved=out.bespoke;}
+        customOrderData.push(saved);
+        closeModal('modal-custom-dress');
+        showWAPreview(STORE_WA,buildBespokeWA(saved));
+        document.getElementById('custom-dress-form').reset();renderBespokePricingForm();calculateEstimasi();
+    }catch(err){alert('Gagal mengirim permintaan bespoke: '+err.message);}
+}
+function buildBespokeWA(o){
+    const m=o.measurements||{};
+    const core=[['LD',m.chest],['LP',m.waist],['Panggul',m.hip],['Bahu',m.shoulder],['Panjang Kebaya',m.kebayaLength]].filter(x=>Number(x[1])>0).map(x=>`${x[0]} ${x[1]} cm`).join(' | ');
+    return `Halo Tim IndCollection,\n\nSaya ingin konsultasi *Bespoke*.\nID: *${o.id}*\nNama: ${o.name}\nWhatsApp: +${o.wa}\nModel: *${o.pricingItem||'-'}*\nPrioritas: ${o.priority||'regular'}\n${core?`Ukuran utama: ${core}\n`:''}BB/Tinggi: ${o.weightHeight||'-'}\nTanggal fitting: ${dateID(o.fittingDate)}\nTanggal ambil: ${dateID(o.pickupDate)}\nCatatan: ${o.notes||'-'}\n\nEstimasi awal: *${formatRupiah(o.estimate)}*\nDP minimal 50%: *${formatRupiah(o.dpEstimate||Math.round(Number(o.estimate||0)*.5))}*\n\nMohon review desain, konfirmasi ukuran, dan harga final. Terima kasih.`;
+}
+
+// ---------- CATALOG + BOOKING ----------
+function filterCatalog(category,clickedBtn=null){
+    activeCatalogFilter=category;
+    document.querySelectorAll('.filter-btn').forEach(btn=>{btn.classList.remove('bg-dark','text-gold','active');btn.classList.add('bg-transparent','text-dark');});
+    if(clickedBtn){clickedBtn.classList.remove('bg-transparent','text-dark');clickedBtn.classList.add('bg-dark','text-gold','active');}
+    renderCatalog(category);
+}
+function slideImage(itemId,direction){
+    const item=catalogData.find(i=>i.id===itemId); if(!item||!item.images?.length||item.images.length<=1)return;
+    const max=item.images.length; currentSlideIndex[itemId]=(Number(currentSlideIndex[itemId]||0)+direction+max)%max;
+    const img=document.getElementById(`img-${itemId}`);if(img)img.src=item.images[currentSlideIndex[itemId]];
+    const dots=document.getElementById(`dots-${itemId}`);if(dots)Array.from(dots.children).forEach((dot,idx)=>dot.className=idx===currentSlideIndex[itemId]?'w-2 h-2 rounded-full bg-gold':'w-2 h-2 rounded-full bg-white/50');
+}
+function renderCatalog(categoryFilter='semua'){
+    const grid=document.getElementById('catalog-grid');if(!grid)return;grid.innerHTML='';
+    const filtered=categoryFilter==='semua'?catalogData:catalogData.filter(i=>i.category===categoryFilter);
+    filtered.forEach(item=>{
+        currentSlideIndex[item.id]=0; const active=String(item.available)!=='false'&&item.available!==false; const multi=(item.images||[]).length>1;
+        const controls=multi?`<button onclick="slideImage('${item.id}',-1);event.stopPropagation();" class="absolute left-2 top-1/2 -translate-y-1/2 slider-btn w-8 h-8 flex items-center justify-center rounded-full z-10">&#10094;</button><button onclick="slideImage('${item.id}',1);event.stopPropagation();" class="absolute right-2 top-1/2 -translate-y-1/2 slider-btn w-8 h-8 flex items-center justify-center rounded-full z-10">&#10095;</button>`:'';
+        const dots=multi?`<div id="dots-${item.id}" class="absolute bottom-3 left-0 w-full flex justify-center gap-1 z-10">${item.images.map((_,idx)=>`<div class="${idx===0?'w-2 h-2 rounded-full bg-gold':'w-2 h-2 rounded-full bg-white/50'}"></div>`).join('')}</div>`:'';
+        const detail=[item.size?`Size ${escapeHtml(item.size)}`:'',item.color?escapeHtml(item.color):''].filter(Boolean).join(' · ');
+        grid.innerHTML+=`<div class="group ${active?'cursor-pointer':'cursor-default'}" onclick="${active?`openBookingModal('${item.id}')`:''}"><div class="relative overflow-hidden bg-gray-100 aspect-[3/4] mb-4"><span class="${active?'bg-dark/80 text-gold':'bg-primary/90 text-white'} text-[10px] uppercase tracking-widest px-3 py-1 absolute top-4 right-4 border border-gold/30 z-20">${active?'Tersedia':'Nonaktif'}</span><div class="w-full h-full relative"><img id="img-${item.id}" src="${escapeHtml(item.images?.[0]||'')}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover transition duration-700 ${active?'group-hover:scale-105':'grayscale opacity-70'}">${controls}${dots}</div></div><div class="text-center px-2"><h3 class="font-serif font-bold text-lg text-dark mb-1 truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>${detail?`<p class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">${detail}</p>`:''}<div>${catalogPriceHtml(item)}</div>${active?`<span class="mt-3 inline-block text-xs uppercase tracking-widest font-bold border-b border-dark pb-1 group-hover:text-gold group-hover:border-gold transition">Pesan Sekarang</span>`:`<span class="mt-3 block text-xs text-gray-400">Tidak Tersedia</span>`}</div></div>`;
+    });
+}
+function openBookingModal(itemId){
+    const item=catalogData.find(i=>i.id===itemId);if(!item)return;
+    document.getElementById('form-item-id').value=itemId;
+    document.getElementById('booking-item-details').innerHTML=`<div class="flex items-center gap-4 border border-gray-100 p-2 bg-gray-50"><img src="${escapeHtml(item.images?.[0]||'')}" class="w-16 h-16 object-cover rounded-sm"><div><h4 class="font-bold text-sm text-dark">${escapeHtml(item.name)}</h4><p class="text-[10px] text-gray-500">${item.size?`Size ${escapeHtml(item.size)}`:''}${item.color?` · ${escapeHtml(item.color)}`:''}</p><div class="text-primary text-xs font-bold">${catalogPriceHtml(item)}</div></div></div>`;
+    document.getElementById('form-date-start').min=nowISODate();document.getElementById('form-date-end').min=nowISODate();document.getElementById('form-voucher').value='';document.getElementById('booking-error').classList.add('hide');
+    updateBookingQuote();openModal('modal-booking');
+}
+function updateBookingQuote(){
+    const item=catalogData.find(i=>i.id===document.getElementById('form-item-id').value);if(!item)return;
+    const start=document.getElementById('form-date-start').value,end=document.getElementById('form-date-end').value,voucher=document.getElementById('form-voucher').value;
+    const q=priceQuote(item,voucher); const err=document.getElementById('booking-error'),btn=document.getElementById('booking-submit-btn');
+    let dateError=''; if(start&&end&&end<start)dateError='Tanggal kembali tidak boleh sebelum tanggal sewa.';
+    err.innerText=dateError;err.classList.toggle('hide',!dateError);btn.disabled=!!dateError;btn.classList.toggle('opacity-50',!!dateError);
+    document.getElementById('booking-price-summary').innerHTML=`<div class="flex justify-between"><span>Harga Sewa</span><b>${formatRupiah(q.base)}</b></div>${q.cleaning?`<div class="flex justify-between"><span>Cleaning Fee</span><span>${formatRupiah(q.cleaning)}</span></div>`:''}${q.deposit?`<div class="flex justify-between"><span>Deposit</span><span>${formatRupiah(q.deposit)}</span></div>`:''}${q.discount?`<div class="flex justify-between text-green-700"><span>${escapeHtml(q.promo?.name||'Promo')}</span><span>- ${formatRupiah(q.discount)}</span></div>`:''}<div class="flex justify-between border-t mt-2 pt-2 text-primary"><b>Total Booking</b><b>${formatRupiah(q.total)}</b></div><p class="text-[9px] text-gray-400 mt-2">Ketersediaan tanggal dikonfirmasi kembali oleh sistem saat tombol Sewa ditekan.</p>`;
+}
+async function submitBooking(e){
+    e.preventDefault();
+    const productId=document.getElementById('form-item-id').value,item=catalogData.find(i=>i.id===productId);if(!item)return;
+    const start=document.getElementById('form-date-start').value,end=document.getElementById('form-date-end').value;
+    if(!start||!end||end<start)return;
+    const q=priceQuote(item,document.getElementById('form-voucher').value);
+    let order={id:makeLocalId('INV'),createdAt:new Date().toISOString(),productId,itemName:item.name,name:document.getElementById('form-name').value.trim(),wa:normalizeWA(document.getElementById('form-wa').value),startDate:start,endDate:end,voucher:document.getElementById('form-voucher').value.trim().toUpperCase(),basePrice:q.base,cleaningFee:q.cleaning,deposit:q.deposit,promoName:q.promo?.name||'',promoDiscount:q.discount,manualDiscount:0,finalTotal:q.total,paid:0,balance:q.total,paymentStatus:'UNPAID',status:'Pending',lateFeePerDay:Number(item.lateFeePerDay||0),lateDays:0,lateFee:0,inventoryCode:item.inventoryCode||''};
+    try{
+        if(API_READY()){const out=await api('createOrder',order);order=out.order;}
+        else{const conflict=orderData.some(o=>o.productId===productId&&o.status!=='Cancelled'&&start<=o.endDate&&end>=o.startDate);if(conflict)throw new Error('BOOKING_CONFLICT');orderData.push(order);saveLocalOrders();}
+        closeModal('modal-booking');
+        showWAPreview(STORE_WA,buildBookingWA(order));
+        e.target.reset();
+    }catch(err){
+        const msg=err.message==='BOOKING_CONFLICT'?'Tanggal tersebut sudah terisi untuk baju ini. Silakan pilih tanggal lain.':err.message;
+        const el=document.getElementById('booking-error');el.innerText=msg;el.classList.remove('hide');
+    }
+}
+function buildBookingWA(o){
+    return `Halo Tim IndCollection,\n\nSaya ingin mengonfirmasi booking berikut:\n\n*INDCOLLECTION - BOOKING SEWA*\nNo. Booking: *${o.id}*\nNama: ${o.name}\nProduk: ${o.itemName}${o.inventoryCode?` (${o.inventoryCode})`:''}\nTanggal Sewa: ${dateID(o.startDate)}\nTanggal Kembali: ${dateID(o.endDate)}\n\nHarga Sewa: ${formatRupiah(o.basePrice)}${o.cleaningFee?`\nCleaning Fee: ${formatRupiah(o.cleaningFee)}`:''}${o.deposit?`\nDeposit: ${formatRupiah(o.deposit)}`:''}${o.promoDiscount?`\nPromo ${o.promoName||''}: -${formatRupiah(o.promoDiscount)}`:''}\n*Total: ${formatRupiah(o.finalTotal)}*\nStatus Pembayaran: ${o.paymentStatus}\n\nMohon konfirmasi booking dan informasi pembayaran/DP. Terima kasih.`;
+}
+
+// ---------- WHATSAPP PREVIEW ----------
+function showWAPreview(phone,text,reminderId=''){waPreviewPhone=normalizeWA(phone||STORE_WA);waPreviewReminderId=reminderId||'';document.getElementById('wa-preview-text').value=text;openModal('modal-wa-preview');}
+async function copyWAText(){const el=document.getElementById('wa-preview-text');try{await navigator.clipboard.writeText(el.value);alert('Teks WhatsApp disalin.');}catch(e){el.select();document.execCommand('copy');alert('Teks WhatsApp disalin.');}}
+function openWAFromPreview(){
+    const text=document.getElementById('wa-preview-text').value,url=`https://wa.me/${waPreviewPhone}?text=${encodeURIComponent(text)}`;
+    window.open(url,'_blank','noopener');
+    if(waPreviewReminderId&&API_READY()){
+        const id=waPreviewReminderId;waPreviewReminderId='';
+        api('markReminderSent',{id},true).then(out=>{const idx=reminderData.findIndex(r=>r.id===id);if(idx>=0)reminderData[idx]=out.reminder;renderReminders();}).catch(console.warn);
+    }
+    closeModal('modal-wa-preview');
+}
+
+// ---------- ADMIN AUTH ----------
+function openAdminLoginModal(){document.getElementById('admin-password').value='';document.getElementById('login-error').classList.add('hide');openModal('modal-admin-login');}
+async function handleLogin(e){
+    e.preventDefault();const error=document.getElementById('login-error');error.classList.add('hide');
+    if(!API_READY()){error.innerText='Hubungkan API_URL Apps Script terlebih dahulu untuk login admin.';error.classList.remove('hide');return;}
+    try{const out=await api('login',{password:document.getElementById('admin-password').value});sessionStorage.setItem(TOKEN_KEY,out.token);closeModal('modal-admin-login');navigate('admin-dashboard');await refreshAdminData();switchAdminTab('sewa');}
+    catch(err){error.innerText=err.message==='INVALID_PASSWORD'?'Password salah.':'Login gagal: '+err.message;error.classList.remove('hide');}
+}
+function logoutAdmin(){sessionStorage.removeItem(TOKEN_KEY);orderData=[];customOrderData=[];paymentData=[];reminderData=[];navigate('home');}
+async function refreshAdminData(){
+    if(!getToken())return;
+    try{
+        const out=await api('adminData',{},true);
+        catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||bespokePricingData;paymentData=out.payments||[];reminderData=out.reminders||[];
+        savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);
+    }catch(err){if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED'].includes(err.message)){logoutAdmin();alert('Sesi admin berakhir. Silakan login kembali.');}else console.error(err);}
+}
+function renderAdminAll(){renderAdminOrders();renderAdminCustom();renderAdminKatalog();renderAdminPromo();renderAdminBespokePricing();renderCalendar();renderReminders();}
+function switchAdminTab(tab){
+    ['sewa','custom','katalog','promo','bespokeprice','calendar','reminder'].forEach(t=>{const btn=document.getElementById(`tab-${t}`),cont=document.getElementById(`admin-${t}-container`);if(!btn||!cont)return;if(t===tab){btn.className='px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap';cont.classList.remove('hide');}else{btn.className='px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap';cont.classList.add('hide');}});
+    if(tab==='calendar')renderCalendar();if(tab==='reminder')renderReminders();
+}
+
+// ---------- ADMIN ORDERS / PAYMENT ----------
+function renderAdminOrders(){
+    const tb=document.getElementById('admin-orders-table');if(!tb)return;
+    if(!orderData.length){tb.innerHTML='<tr><td class="p-8 text-center text-gray-400">Belum ada penyewaan.</td></tr>';return;}
+    tb.innerHTML='<tr class="bg-gray-50 text-[10px] uppercase tracking-wider text-gray-500"><th class="p-3 text-left">Invoice</th><th class="p-3 text-left">Pelanggan</th><th class="p-3 text-left">Produk / Tanggal</th><th class="p-3 text-left">Total</th><th class="p-3 text-left">Pembayaran</th><th class="p-3 text-left">Status</th><th class="p-3 text-left">Aksi</th></tr>'+[...orderData].reverse().map(o=>{
+        const late=o.lateFee>0?`<div class="text-[9px] text-primary mt-1">Terlambat ${o.lateDays} hari · ${formatRupiah(o.lateFee)}</div>`:'';
+        return `<tr class="border-b hover:bg-gray-50"><td class="p-3"><b class="text-xs">${escapeHtml(o.id)}</b><div class="text-[9px] text-gray-400">${(o.createdAt||'').slice(0,10)}</div></td><td class="p-3"><div class="text-xs font-bold">${escapeHtml(o.name)}</div><div class="text-[10px] text-gray-500">+${escapeHtml(o.wa)}</div></td><td class="p-3"><div class="text-xs">${escapeHtml(o.itemName)}</div><div class="text-[9px] text-gray-400">${escapeHtml(o.inventoryCode||'')}</div><div class="text-[10px] text-gray-500">${dateID(o.startDate)} – ${dateID(o.endDate)}</div>${late}</td><td class="p-3 text-xs font-bold">${formatRupiah(o.finalTotal)}</td><td class="p-3"><div class="text-[10px] font-bold ${o.paymentStatus==='PAID'?'text-green-700':'text-primary'}">${escapeHtml(o.paymentStatus)}</div><div class="text-[10px]">Bayar ${formatRupiah(o.paid)}<br>Sisa ${formatRupiah(o.balance)}</div></td><td class="p-3"><select onchange="updateOrderStatus('${o.id}',this.value)" class="border text-[10px] p-1"><option ${o.status==='Pending'?'selected':''}>Pending</option><option ${o.status==='Confirmed'?'selected':''}>Confirmed</option><option ${o.status==='In Use'?'selected':''}>In Use</option><option ${o.status==='Returned'?'selected':''}>Returned</option><option ${o.status==='Cancelled'?'selected':''}>Cancelled</option></select></td><td class="p-3"><div class="flex flex-col gap-1 w-max"><button onclick="openPaymentModal('${o.id}')" class="bg-primary text-white px-2 py-1 text-[9px] uppercase font-bold">Bayar / Diskon</button><button onclick="generateInvoice('${o.id}')" class="bg-dark text-gold px-2 py-1 text-[9px] uppercase font-bold">Nota PDF + QR</button><button onclick="adminOrderWA('${o.id}')" class="border border-green-600 text-green-700 px-2 py-1 text-[9px] uppercase font-bold">WhatsApp</button><button onclick="openCustomerHistory('${o.wa}')" class="border border-gray-400 text-gray-600 px-2 py-1 text-[9px] uppercase font-bold">Riwayat WA</button></div></td></tr>`;
+    }).join('');
+}
+async function updateOrderStatus(id,status){try{const out=await api('updateOrder',{id,status},true);const idx=orderData.findIndex(x=>x.id===id);if(idx>=0)orderData[idx]=out.order;renderAdminAll();}catch(err){alert('Gagal: '+err.message);await refreshAdminData();}}
+function openPaymentModal(id){
+    const o=orderData.find(x=>x.id===id);if(!o)return;
+    document.getElementById('payment-order-id').value=id;document.getElementById('payment-discount-type').value='none';document.getElementById('payment-discount-value').value=0;document.getElementById('payment-discount-reason').value='';document.getElementById('payment-amount').value='';document.getElementById('payment-notes').value='';document.getElementById('payment-proof').value='';document.getElementById('payment-upload-status').innerText='';
+    document.getElementById('payment-order-summary').innerHTML=`<b>${escapeHtml(o.id)} — ${escapeHtml(o.name)}</b><div class="mt-2 flex justify-between"><span>Total saat ini</span><b>${formatRupiah(o.finalTotal)}</b></div>${o.lateFee?`<div class="flex justify-between text-primary"><span>Denda (${o.lateDays} hari)</span><b>${formatRupiah(o.lateFee)}</b></div>`:''}<div class="flex justify-between"><span>Sudah dibayar</span><b>${formatRupiah(o.paid)}</b></div><div class="flex justify-between text-primary"><span>Sisa</span><b>${formatRupiah(o.balance)}</b></div>`;openModal('modal-payment');
+}
+async function submitPayment(e){
+    e.preventDefault(); const id=document.getElementById('payment-order-id').value,status=document.getElementById('payment-upload-status'),btn=document.getElementById('payment-submit-btn');btn.disabled=true;btn.classList.add('opacity-50');
+    try{
+        let proofUrl='',proofFileId=''; const file=document.getElementById('payment-proof').files[0];
+        if(file){status.innerText='Mengunggah bukti pembayaran ke Google Drive...';const up=await uploadAdminFile(file,'payment','Bukti-'+id);proofUrl=up.url;proofFileId=up.fileId;}
+        const payload={id,discountType:document.getElementById('payment-discount-type').value,discountValue:Number(document.getElementById('payment-discount-value').value||0),discountReason:document.getElementById('payment-discount-reason').value.trim(),amount:Number(document.getElementById('payment-amount').value||0),method:document.getElementById('payment-method').value,notes:document.getElementById('payment-notes').value.trim(),proofUrl,proofFileId};
+        const out=await api('addPayment',payload,true);const idx=orderData.findIndex(x=>x.id===id);if(idx>=0)orderData[idx]=out.order;if(out.payment?.id)paymentData.push(out.payment);closeModal('modal-payment');renderAdminAll();showWAPreview(out.order.wa,buildPaymentWA(out.order,out.payment));
+    }catch(err){alert('Gagal menyimpan pembayaran: '+err.message);}finally{btn.disabled=false;btn.classList.remove('opacity-50');status.innerText='';}
+}
+function buildPaymentWA(o,p){return `Halo Kak ${o.name}, terima kasih telah memilih *IndCollection*.\n\nNo. Invoice: *${o.id}*\nProduk: ${o.itemName}\n${p&&p.amount?`Pembayaran diterima: *${formatRupiah(p.amount)}* (${p.method})\n`:''}${o.lateFee?`Denda keterlambatan: ${formatRupiah(o.lateFee)} (${o.lateDays} hari)\n`:''}Total: *${formatRupiah(o.finalTotal)}*\nSudah dibayar: ${formatRupiah(o.paid)}\nSisa: *${formatRupiah(o.balance)}*\nStatus: *${o.paymentStatus}*\n\nSimpan nota sebagai bukti transaksi. Terima kasih.\n— IndCollection`;}
+function adminOrderWA(id){const o=orderData.find(x=>x.id===id);if(!o)return;showWAPreview(o.wa,`Halo Kak ${o.name}, berikut ringkasan booking IndCollection.\n\nNo. Invoice: *${o.id}*\nProduk: ${o.itemName}\nSewa: ${dateID(o.startDate)} – ${dateID(o.endDate)}\n${o.lateFee?`Denda: ${formatRupiah(o.lateFee)} (${o.lateDays} hari)\n`:''}Total: *${formatRupiah(o.finalTotal)}*\nSudah Dibayar: ${formatRupiah(o.paid)}\nSisa: ${formatRupiah(o.balance)}\nStatus Booking: ${o.status}\nStatus Pembayaran: ${o.paymentStatus}\n\nTerima kasih.`);}
+
+// ---------- PDF INVOICE + QR ----------
+async function generateInvoice(id){
+    const o=orderData.find(x=>x.id===id);if(!o)return;
+    if(!window.jspdf){alert('Library PDF belum termuat. Silakan refresh halaman.');return;}
+    const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'});let y=22;
+    doc.setFillColor(123,17,19);doc.rect(0,0,210,32,'F');doc.setTextColor(243,229,171);doc.setFont('helvetica','bold');doc.setFontSize(20);doc.text('INDCOLLECTION',18,17);doc.setFontSize(8);doc.text('EXCLUSIVE KEBAYA & BESPOKE DRESS',18,24);
+    doc.setTextColor(26,26,26);doc.setFontSize(16);doc.text('INVOICE',192,17,{align:'right'});doc.setFontSize(9);doc.text(o.id,192,24,{align:'right'});y=44;
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('Pelanggan',18,y);doc.text('Detail Sewa',110,y);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(o.name,18,y+6);doc.text('WhatsApp: +'+o.wa,18,y+11);doc.text(o.itemName,110,y+6);doc.text('Kode: '+(o.inventoryCode||o.productId),110,y+11);doc.text(`${dateID(o.startDate)} - ${dateID(o.endDate)}`,110,y+16);y=72;
+    doc.setDrawColor(212,175,55);doc.line(18,y,192,y);y+=8;
+    const rows=[['Harga Sewa',o.basePrice],['Cleaning Fee',o.cleaningFee],['Deposit',o.deposit]];
+    if(o.promoDiscount)rows.push(['Promo '+(o.promoName||''),-o.promoDiscount]);if(o.manualDiscount)rows.push(['Diskon '+(o.manualDiscountReason||'Admin'),-o.manualDiscount]);if(o.lateFee)rows.push([`Denda keterlambatan (${o.lateDays} hari)`,o.lateFee]);
+    doc.setFontSize(9);rows.forEach(r=>{if(!r[1]&&r[0]!=='Harga Sewa')return;doc.text(r[0],22,y);doc.text(formatRupiah(r[1]),188,y,{align:'right'});y+=7;});
+    doc.line(18,y,192,y);y+=9;doc.setFont('helvetica','bold');doc.setFontSize(12);doc.text('TOTAL',22,y);doc.text(formatRupiah(o.finalTotal),188,y,{align:'right'});y+=9;doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Sudah Dibayar',22,y);doc.text(formatRupiah(o.paid),188,y,{align:'right'});y+=6;doc.text('Sisa Pembayaran',22,y);doc.text(formatRupiah(o.balance),188,y,{align:'right'});y+=10;
+    doc.setFillColor(o.paymentStatus==='PAID'?220:253,o.paymentStatus==='PAID'?252:242,o.paymentStatus==='PAID'?231:248);doc.roundedRect(18,y,174,14,2,2,'F');doc.setFont('helvetica','bold');doc.text('STATUS: '+o.paymentStatus,22,y+9);y+=25;
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.text('Scan QR untuk menghubungi IndCollection dengan referensi invoice ini.',18,y);
+    try{const qr=makeQRDataURL(`https://wa.me/${STORE_WA}?text=${encodeURIComponent('Halo IndCollection, saya ingin konfirmasi invoice '+o.id)}`);if(qr)doc.addImage(qr,'PNG',18,y+5,28,28);}catch(e){console.warn('QR gagal',e);}
+    doc.setFontSize(8);doc.text('IndCollection',55,y+12);doc.text('Jl. Ridwan Rais Gg. Ainan No.9, Bandar Lampung',55,y+18);doc.text('WhatsApp: +62 812-2000-7780',55,y+24);
+    doc.setTextColor(120);doc.text('Nota dibuat otomatis oleh sistem IndCollection.',18,285);doc.save(`IndCollection_${o.id}_${String(o.name).replace(/[^a-z0-9]+/gi,'-')}.pdf`);
+}
+function makeQRDataURL(text){
+    if(typeof QRCode==='undefined')return'';const wrap=document.createElement('div');wrap.style.position='fixed';wrap.style.left='-9999px';document.body.appendChild(wrap);new QRCode(wrap,{text,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});const canvas=wrap.querySelector('canvas');const data=canvas?canvas.toDataURL('image/png'):'';wrap.remove();return data;
+}
+
+// ---------- CUSTOMER HISTORY ----------
+async function openCustomerHistory(wa){
+    const normalized=normalizeWA(wa);openModal('modal-customer-history');document.getElementById('customer-history-title').innerText='Riwayat Pelanggan +'+normalized;document.getElementById('customer-history-content').innerHTML='<div class="p-8 text-center text-gray-400">Memuat riwayat...</div>';
+    try{
+        let history;
+        if(API_READY()) history=await api('customerHistory',{wa:normalized},true);
+        else{const orders=orderData.filter(o=>normalizeWA(o.wa)===normalized),ids=orders.map(o=>o.id);history={wa:normalized,orders,bespoke:customOrderData.filter(o=>normalizeWA(o.wa)===normalized),payments:paymentData.filter(p=>ids.includes(p.orderId)),totalOrders:orders.length,totalSpend:orders.reduce((a,o)=>a+Number(o.paid||0),0)};}
+        renderCustomerHistory(history);
+    }catch(err){document.getElementById('customer-history-content').innerHTML=`<div class="p-6 text-primary">Gagal memuat: ${escapeHtml(err.message)}</div>`;}
+}
+function renderCustomerHistory(h){
+    const orders=h.orders||[],bespoke=h.bespoke||[],payments=h.payments||[];
+    const orderHtml=orders.length?orders.slice().reverse().map(o=>`<div class="border-b py-3"><div class="flex justify-between gap-3"><div><b class="text-xs">${escapeHtml(o.id)}</b><div class="text-[10px] text-gray-500">${escapeHtml(o.itemName)} · ${dateID(o.startDate)} – ${dateID(o.endDate)}</div></div><div class="text-right"><b class="text-xs">${formatRupiah(o.finalTotal)}</b><div class="text-[9px] ${o.paymentStatus==='PAID'?'text-green-700':'text-primary'}">${escapeHtml(o.paymentStatus)}</div></div></div></div>`).join(''):'<p class="text-xs text-gray-400">Belum ada penyewaan.</p>';
+    const bespokeHtml=bespoke.length?bespoke.slice().reverse().map(b=>`<div class="border-b py-2 text-xs"><b>${escapeHtml(b.id)}</b> · ${escapeHtml(b.status)} · ${formatRupiah(b.estimate)}</div>`).join(''):'<p class="text-xs text-gray-400">Belum ada pesanan bespoke.</p>';
+    const payHtml=payments.length?payments.slice().reverse().map(p=>`<div class="border-b py-2 flex justify-between text-xs"><span>${escapeHtml(p.id)} · ${escapeHtml(p.method)}${p.proofUrl?` · <a href="${escapeHtml(p.proofUrl)}" target="_blank" class="text-primary underline">Bukti</a>`:''}</span><b>${formatRupiah(p.amount)}</b></div>`).join(''):'<p class="text-xs text-gray-400">Belum ada pembayaran.</p>';
+    document.getElementById('customer-history-content').innerHTML=`<div class="grid grid-cols-2 gap-3 mb-5"><div class="bg-lightBg border p-4"><div class="text-[10px] uppercase text-gray-500">Jumlah Sewa</div><div class="font-serif text-2xl text-primary">${h.totalOrders||orders.length}</div></div><div class="bg-lightBg border p-4"><div class="text-[10px] uppercase text-gray-500">Total Dibayar</div><div class="font-serif text-xl text-primary">${formatRupiah(h.totalSpend||0)}</div></div></div><h4 class="font-serif font-bold mb-2">Riwayat Penyewaan</h4>${orderHtml}<h4 class="font-serif font-bold mt-5 mb-2">Bespoke</h4>${bespokeHtml}<h4 class="font-serif font-bold mt-5 mb-2">Pembayaran</h4>${payHtml}`;
+}
+
+// ---------- ADMIN CALENDAR ----------
+function calendarPrev(){calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar();}
+function calendarNext(){calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar();}
+function calendarToday(){calendarCursor=new Date();calendarCursor.setDate(1);renderCalendar();}
+
+function renderAdminBespokePricing(){
+    const tb=document.getElementById('admin-bespokeprice-table');if(!tb)return;
+    if(!bespokePricingData.length){tb.innerHTML='<tr><td colspan="6" class="p-8 text-center text-gray-400">Master harga belum tersedia.</td></tr>';return;}
+    tb.innerHTML=[...bespokePricingData].map(p=>`<tr class="border-b"><td class="p-3"><span class="mini-badge text-primary">${escapeHtml(p.category)}</span></td><td class="p-3"><div class="text-xs font-bold">${escapeHtml(p.item)}</div><div class="text-[9px] text-gray-400">${escapeHtml(p.code)} ${p.note?'· '+escapeHtml(p.note):''}</div></td><td class="p-3 text-xs font-bold">${priceRangeText(p)}</td><td class="p-3 text-xs text-gray-500">${escapeHtml(p.unit||'-')}</td><td class="p-3"><span class="${p.active!==false?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'} px-2 py-1 text-[9px] uppercase font-bold">${p.active!==false?'Aktif':'Nonaktif'}</span></td><td class="p-3"><div class="flex gap-1"><button onclick="openBespokePriceModal('${p.code}')" class="border border-dark px-2 py-1 text-[9px] uppercase font-bold">Edit</button><button onclick="deleteBespokePrice('${p.code}')" class="border border-primary text-primary px-2 py-1 text-[9px] uppercase font-bold">Hapus</button></div></td></tr>`).join('');
+}
+function openBespokePriceModal(code=''){
+    const p=getBespokePrice(code);
+    document.getElementById('bespoke-price-form').reset();
+    document.getElementById('bp-code').value=p?.code||'';
+    document.getElementById('bp-code-input').value=p?.code||'';
+    document.getElementById('bp-category').value=p?.category||'Atasan';
+    document.getElementById('bp-item').value=p?.item||'';
+    document.getElementById('bp-min').value=p?.priceMin||'';
+    document.getElementById('bp-max').value=p?.priceMax||'';
+    document.getElementById('bp-unit').value=p?.unit||'pcs';
+    document.getElementById('bp-calc').value=p?.calcType||'base';
+    document.getElementById('bp-note').value=p?.note||'';
+    document.getElementById('bp-active').checked=p?p.active!==false:true;
+    document.getElementById('bespoke-price-modal-title').textContent=p?'Edit Harga Bespoke':'Tambah Harga Bespoke';
+    openModal('modal-bespoke-price');
+}
+async function submitBespokePrice(e){
+    e.preventDefault();
+    const data={code:document.getElementById('bp-code').value||document.getElementById('bp-code-input').value.trim(),category:document.getElementById('bp-category').value,item:document.getElementById('bp-item').value.trim(),priceMin:Number(document.getElementById('bp-min').value||0),priceMax:Number(document.getElementById('bp-max').value||0),unit:document.getElementById('bp-unit').value.trim(),calcType:document.getElementById('bp-calc').value,note:document.getElementById('bp-note').value.trim(),active:document.getElementById('bp-active').checked};
+    try{const out=await api('upsertBespokePrice',data,true);const idx=bespokePricingData.findIndex(x=>x.code===out.price.code);if(idx>=0)bespokePricingData[idx]=out.price;else bespokePricingData.push(out.price);closeModal('modal-bespoke-price');renderAdminBespokePricing();renderBespokePricingForm();savePublicCache();}catch(err){alert('Gagal: '+err.message);}
+}
+async function deleteBespokePrice(code){if(!confirm('Hapus item harga ini?'))return;try{await api('deleteBespokePrice',{code},true);bespokePricingData=bespokePricingData.filter(x=>x.code!==code);renderAdminBespokePricing();renderBespokePricingForm();savePublicCache();}catch(err){alert('Gagal: '+err.message);}}
+
+function renderCalendar(){
+    const grid=document.getElementById('admin-calendar-grid'),title=document.getElementById('admin-calendar-title');if(!grid||!title)return;
+    title.innerText=calendarCursor.toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+    const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth(),first=new Date(year,month,1),start=new Date(year,month,1-first.getDay());
+    const names=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];let html=names.map(n=>`<div class="bg-dark text-gold text-center text-[10px] uppercase tracking-wider p-2 font-bold">${n}</div>`).join('');
+    for(let i=0;i<42;i++){
+        const d=new Date(start);d.setDate(start.getDate()+i);const iso=localISODate(d),inMonth=d.getMonth()===month;
+        const bookings=orderData.filter(o=>o.status!=='Cancelled'&&o.startDate<=iso&&o.endDate>=iso);
+        html+=`<div class="min-h-28 border border-gray-100 p-2 ${inMonth?'bg-white':'bg-gray-50 text-gray-300'}"><div class="text-[10px] font-bold mb-1 ${iso===nowISODate()?'text-primary':''}">${d.getDate()}</div>${bookings.slice(0,3).map(o=>`<div title="${escapeHtml(o.name)} · ${escapeHtml(o.itemName)}" class="mb-1 px-1.5 py-1 text-[8px] leading-tight ${o.status==='In Use'?'bg-primary text-white':'bg-goldLight text-dark'} overflow-hidden">${escapeHtml(o.inventoryCode||o.itemName)}</div>`).join('')}${bookings.length>3?`<div class="text-[8px] text-gray-400">+${bookings.length-3} booking</div>`:''}</div>`;
+    }
+    grid.innerHTML=html;
+}
+
+// ---------- ADMIN REMINDERS ----------
+async function refreshReminders(){try{const out=await api('refreshReminders',{},true);reminderData=out.reminders||[];renderReminders();}catch(err){alert('Gagal memperbarui reminder: '+err.message);}}
+function renderReminders(){
+    const c=document.getElementById('admin-reminder-list');if(!c)return;
+    const sorted=[...reminderData].sort((a,b)=>{if(a.status!==b.status)return a.status==='PENDING'?-1:1;return String(b.generatedAt).localeCompare(String(a.generatedAt));});
+    if(!sorted.length){c.innerHTML='<div class="p-8 text-center text-gray-400">Belum ada reminder untuk hari ini.</div>';return;}
+    c.innerHTML=sorted.map(r=>{const labels={'PICKUP_H-1':'H-1 Pengambilan','RETURN_H+0':'Hari Pengembalian',OVERDUE:'Terlambat'};return `<div class="border-b p-4 flex flex-col md:flex-row md:items-center justify-between gap-3"><div><div class="text-[10px] uppercase tracking-widest font-bold ${r.type==='OVERDUE'?'text-primary':'text-gold'}">${labels[r.type]||escapeHtml(r.type)}</div><div class="font-bold text-sm mt-1">${escapeHtml(r.name)} · ${escapeHtml(r.orderId)}</div><div class="text-[10px] text-gray-500">+${escapeHtml(r.wa)} · ${dateID(r.dueDate)} · ${escapeHtml(r.status)}</div><p class="text-xs text-gray-600 mt-2 max-w-3xl">${escapeHtml(r.message)}</p></div><button onclick="openReminderWA('${r.id}')" class="${r.status==='SENT'?'border border-gray-300 text-gray-500':'bg-green-600 text-white'} px-4 py-2 text-[10px] uppercase font-bold whitespace-nowrap">${r.status==='SENT'?'Kirim Ulang':'Buka WhatsApp'}</button></div>`;}).join('');
+}
+function openReminderWA(id){const r=reminderData.find(x=>x.id===id);if(!r)return;showWAPreview(r.wa,r.message,r.id);}
+
+// ---------- ADMIN BESPOKE ----------
+function renderAdminCustom(){
+    const tb=document.getElementById('admin-custom-table');if(!tb)return;
+    if(!customOrderData.length){tb.innerHTML='<tr><td class="p-8 text-center text-gray-400">Belum ada pesanan bespoke.</td></tr>';return;}
+    tb.innerHTML='<tr class="bg-gray-50 text-[10px] uppercase text-gray-500"><th class="p-3 text-left">ID</th><th class="p-3 text-left">Pelanggan</th><th class="p-3 text-left">Model</th><th class="p-3 text-left">Estimasi</th><th class="p-3 text-left">Status</th><th class="p-3 text-left">Aksi</th></tr>'+[...customOrderData].reverse().map(o=>`<tr class="border-b"><td class="p-3 text-xs font-bold">${escapeHtml(o.id)}</td><td class="p-3"><div class="text-xs font-bold">${escapeHtml(o.name)}</div><div class="text-[10px] text-gray-500">+${escapeHtml(o.wa)}</div></td><td class="p-3"><div class="text-xs">${escapeHtml(o.pricingItem||'-')}</div><div class="text-[9px] text-gray-400">${escapeHtml(o.pickupDate?dateID(o.pickupDate):'')}</div></td><td class="p-3 text-xs font-bold">${formatRupiah(o.estimate)}</td><td class="p-3"><select onchange="updateBespokeStatus('${o.id}',this.value)" class="border text-[10px] p-1">${['Lead','Quotation','DP','Production','Fitting','Done'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></td><td class="p-3"><div class="flex flex-col gap-1 w-max"><button onclick="showBespokeDetail('${o.id}')" class="bg-dark text-gold px-2 py-1 text-[9px] uppercase font-bold">Detail Ukuran</button><button onclick="adminBespokeWA('${o.id}')" class="border border-green-600 text-green-700 px-2 py-1 text-[9px] uppercase font-bold">WhatsApp</button><button onclick="openCustomerHistory('${o.wa}')" class="border border-gray-400 text-gray-600 px-2 py-1 text-[9px] uppercase font-bold">Riwayat WA</button></div></td></tr>`).join('');
+}
+function resetManageFiles(){[1,2,3].forEach(i=>{document.getElementById(`manage-file-${i}`).value='';document.getElementById(`manage-fileid-${i}`).value='';});document.getElementById('manage-upload-status').innerText='';}
+function openManageItemModal(){
+    document.getElementById('manage-modal-title').innerText='Tambah Item Baju Baru';document.getElementById('manage-mode').value='add';document.getElementById('manage-item-form').reset();document.getElementById('manage-id').value='';document.getElementById('manage-deposit').value=100000;document.getElementById('manage-cleaning').value=0;document.getElementById('manage-late-fee').value=50000;document.getElementById('manage-condition').value='Baik';resetManageFiles();openModal('modal-manage-item');
+}
+function openEditItemModal(id){
+    const item=catalogData.find(i=>i.id===id);if(!item)return;document.getElementById('manage-modal-title').innerText='Edit Data: '+item.name;document.getElementById('manage-mode').value='edit';document.getElementById('manage-id').value=item.id;document.getElementById('manage-name').value=item.name;document.getElementById('manage-inventory-code').value=item.inventoryCode||'';document.getElementById('manage-category').value=item.category;document.getElementById('manage-size').value=item.size||'';document.getElementById('manage-color').value=item.color||'';document.getElementById('manage-location').value=item.location||'';document.getElementById('manage-condition').value=item.condition||'Baik';document.getElementById('manage-late-fee').value=item.lateFeePerDay||0;document.getElementById('manage-price').value=item.price;document.getElementById('manage-compare-price').value=item.comparePrice||'';document.getElementById('manage-deposit').value=item.deposit||0;document.getElementById('manage-cleaning').value=item.cleaningFee||0;document.getElementById('manage-status').value=String(item.available);document.getElementById('manage-description').value=item.description||'';document.getElementById('manage-img-1').value=item.images?.[0]||'';document.getElementById('manage-img-2').value=item.images?.[1]||'';document.getElementById('manage-img-3').value=item.images?.[2]||'';[1,2,3].forEach((n,idx)=>{document.getElementById(`manage-file-${n}`).value='';document.getElementById(`manage-fileid-${n}`).value=item.imageFileIds?.[idx]||'';});document.getElementById('manage-upload-status').innerText='';openModal('modal-manage-item');
+}
+async function submitManageItem(e){
+    e.preventDefault();const mode=document.getElementById('manage-mode').value,status=document.getElementById('manage-upload-status'),btn=document.getElementById('manage-submit-btn');btn.disabled=true;btn.classList.add('opacity-50');
+    try{
+        const images=[document.getElementById('manage-img-1').value.trim(),document.getElementById('manage-img-2').value.trim(),document.getElementById('manage-img-3').value.trim()];
+        const fileIds=[document.getElementById('manage-fileid-1').value,document.getElementById('manage-fileid-2').value,document.getElementById('manage-fileid-3').value];
+        for(let i=0;i<3;i++){
+            const file=document.getElementById(`manage-file-${i+1}`).files[0];
+            if(file){status.innerText=`Mengunggah foto ${i+1} ke Google Drive...`;const up=await uploadAdminFile(file,'product',`${document.getElementById('manage-inventory-code').value||'Baju'}-${i+1}`);images[i]=up.url;fileIds[i]=up.fileId;}
+        }
+        if(!images[0])throw new Error('Foto utama wajib diisi melalui upload atau URL.');
+        const item={id:mode==='edit'?document.getElementById('manage-id').value:'',name:document.getElementById('manage-name').value.trim(),inventoryCode:document.getElementById('manage-inventory-code').value.trim(),category:document.getElementById('manage-category').value,size:document.getElementById('manage-size').value.trim(),color:document.getElementById('manage-color').value.trim(),location:document.getElementById('manage-location').value.trim(),condition:document.getElementById('manage-condition').value,lateFeePerDay:Number(document.getElementById('manage-late-fee').value||0),description:document.getElementById('manage-description').value.trim(),price:Number(document.getElementById('manage-price').value),comparePrice:Number(document.getElementById('manage-compare-price').value||0),deposit:Number(document.getElementById('manage-deposit').value||0),cleaningFee:Number(document.getElementById('manage-cleaning').value||0),available:document.getElementById('manage-status').value==='true',images,imageFileIds:fileIds};
+        status.innerText='Menyimpan data ke Spreadsheet...';const out=await api('upsertProduct',item,true);const saved=out.product;const idx=catalogData.findIndex(x=>x.id===saved.id);if(idx>=0)catalogData[idx]=saved;else catalogData.push(saved);savePublicCache();closeModal('modal-manage-item');renderAdminKatalog();renderCatalog(activeCatalogFilter);showSuccessAlert('Database Diperbarui','Data baju tersimpan ke Google Sheet dan foto upload tersimpan di Google Drive.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);
+    }catch(err){alert('Gagal menyimpan: '+err.message);}finally{btn.disabled=false;btn.classList.remove('opacity-50');status.innerText='';}
+}
+async function deleteItem(id){if(!confirm('PERINGATAN: Hapus item ini dari katalog?'))return;try{await api('deleteProduct',{id},true);catalogData=catalogData.filter(i=>i.id!==id);savePublicCache();renderAdminKatalog();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal menghapus: '+err.message);}}
+async function syncSheetNow(){const btn=document.getElementById('sync-sheet-btn');if(btn)btn.disabled=true;try{await refreshAdminData();showSuccessAlert('Sinkronisasi Selesai','Data terbaru dari Google Sheet sudah dimuat ke dashboard dan frontend.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);}finally{if(btn)btn.disabled=false;}}
+
+// ---------- FILE PREPARATION / UPLOAD ----------
+function readFileAsDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=()=>reject(r.error);r.readAsDataURL(file);});}
+async function compressImageFile(file,maxDim=1600,quality=.82){
+    const data=await readFileAsDataURL(file),img=new Image();await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=data;});let w=img.width,h=img.height,scale=Math.min(1,maxDim/Math.max(w,h));w=Math.round(w*scale);h=Math.round(h*scale);const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);return {base64:canvas.toDataURL('image/jpeg',quality).split(',')[1],mimeType:'image/jpeg',fileName:String(file.name).replace(/\.[^.]+$/, '')+'.jpg'};
+}
+async function prepareUpload(file){
+    if(file.type.startsWith('image/'))return compressImageFile(file);
+    const data=await readFileAsDataURL(file);return {base64:data.split(',')[1],mimeType:file.type||'application/octet-stream',fileName:file.name};
+}
+async function uploadAdminFile(file,category,prefix='file'){
+    const prepared=await prepareUpload(file);prepared.fileName=`${prefix}-${Date.now()}-${prepared.fileName}`;prepared.category=category;const out=await api('uploadFile',prepared,true);return out.file;
+}
+
+// ---------- ADMIN PROMO ----------
+function renderAdminPromo(){const tb=document.getElementById('admin-promo-table');if(!tb)return;if(!promoData.length){tb.innerHTML='<tr><td colspan="6" class="p-8 text-center text-gray-400">Belum ada promo.</td></tr>';return;}tb.innerHTML=[...promoData].reverse().map(p=>`<tr class="border-b hover:bg-gray-50"><td class="p-3"><b class="text-xs">${escapeHtml(p.name)}</b><div class="text-[9px] text-primary">${p.code?escapeHtml(p.code):'PROMO OTOMATIS'}</div></td><td class="p-3 text-xs font-bold">${p.type==='percent'?`${p.value}%`:formatRupiah(p.value)}</td><td class="p-3 text-[10px]">${dateID(p.startDate)}<br>${dateID(p.endDate)}</td><td class="p-3 text-[10px] uppercase">${escapeHtml(p.scope)} ${p.target?'/ '+escapeHtml(p.target):''}</td><td class="p-3"><span class="${String(p.active)!=='false'?'text-green-700':'text-gray-400'} text-[10px] font-bold uppercase">${String(p.active)!=='false'?'Aktif':'Nonaktif'}</span></td><td class="p-3"><div class="flex flex-col gap-1 w-max"><button onclick="openPromoModal('${p.id}')" class="bg-dark text-gold px-2 py-1 text-[9px] uppercase font-bold">Edit</button><button onclick="deletePromo('${p.id}')" class="border border-primary text-primary px-2 py-1 text-[9px] uppercase font-bold">Hapus</button></div></td></tr>`).join('');}
+function openPromoModal(id=''){document.getElementById('promo-form').reset();document.getElementById('promo-mode').value=id?'edit':'add';document.getElementById('promo-id').value=id;document.getElementById('promo-modal-title').innerText=id?'Edit Promo':'Tambah Promo';document.getElementById('promo-start').value=nowISODate();document.getElementById('promo-end').value=nowISODate();document.getElementById('promo-active').value='true';if(id){const p=promoData.find(x=>x.id===id);if(p){document.getElementById('promo-name').value=p.name;document.getElementById('promo-code').value=p.code||'';document.getElementById('promo-type').value=p.type;document.getElementById('promo-value').value=p.value;document.getElementById('promo-min').value=p.minTransaction||0;document.getElementById('promo-start').value=p.startDate;document.getElementById('promo-end').value=p.endDate;document.getElementById('promo-scope').value=p.scope;document.getElementById('promo-target').value=p.target||'';document.getElementById('promo-active').value=String(p.active);}}togglePromoTarget();openModal('modal-promo');}
+function togglePromoTarget(){const s=document.getElementById('promo-scope').value;document.getElementById('promo-target').disabled=s==='all';if(s==='all')document.getElementById('promo-target').value='';}
+async function submitPromo(e){e.preventDefault();const p={id:document.getElementById('promo-id').value,name:document.getElementById('promo-name').value.trim(),code:document.getElementById('promo-code').value.trim().toUpperCase(),type:document.getElementById('promo-type').value,value:Number(document.getElementById('promo-value').value),minTransaction:Number(document.getElementById('promo-min').value||0),startDate:document.getElementById('promo-start').value,endDate:document.getElementById('promo-end').value,scope:document.getElementById('promo-scope').value,target:document.getElementById('promo-target').value.trim(),active:document.getElementById('promo-active').value==='true'};try{const out=await api('upsertPromo',p,true);const saved=out.promo;const idx=promoData.findIndex(x=>x.id===saved.id);if(idx>=0)promoData[idx]=saved;else promoData.push(saved);savePublicCache();closeModal('modal-promo');renderAdminPromo();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal menyimpan promo: '+err.message);}}
+async function deletePromo(id){if(!confirm('Hapus promo ini?'))return;try{await api('deletePromo',{id},true);promoData=promoData.filter(x=>x.id!==id);savePublicCache();renderAdminPromo();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal: '+err.message);}}
+
+document.addEventListener('DOMContentLoaded',bootstrap);
+setInterval(()=>{if(getToken()&&!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData();},60000);
+
+    </script>
+</body>
+</html>
