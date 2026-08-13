@@ -105,7 +105,7 @@
                 <button onclick="navigate('home')" class="text-dark hover:text-primary transition-colors">Beranda</button>
                 <button onclick="navigate('catalog')" class="text-dark hover:text-primary transition-colors">Sewa Kebaya</button>
                 <button onclick="navigate('bespoke')" class="text-gold hover:text-primary transition-colors border-b border-transparent hover:border-primary pb-1">Bespoke / Custom</button>
-                <button onclick="openAdminLoginModal()" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Admin</button>
+                <button onclick="openAccessPanel()" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Admin</button>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -118,7 +118,7 @@
             <button onclick="navigate('home'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Beranda</button>
             <button onclick="navigate('catalog'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Sewa Kebaya</button>
             <button onclick="navigate('bespoke'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide text-gold">Bespoke / Custom Dress</button>
-            <button onclick="openAdminLoginModal(); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Admin Login</button>
+            <button onclick="openAccessPanel(); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Admin Login</button>
         </div>
     </nav>
 
@@ -370,14 +370,16 @@
         </div>
     </footer>
 
-    <!-- MODAL ADMIN LOGIN -->
-    <div id="modal-admin-login" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
+    <!-- PORTAL ACCESS -->
+    <div id="modal-access" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
         <div class="bg-white w-full max-w-sm p-8 shadow-2xl animate-modal-pop border-t-4 border-primary relative">
-            <button onclick="closeModal('modal-admin-login')" class="absolute top-4 right-4 text-gray-400">X</button>
-            <h2 class="text-xl font-serif font-bold mb-4 text-center">Admin IndCollection</h2>
-            <input type="password" id="admin-password" class="w-full border-b-2 p-2 mb-4 outline-none" placeholder="Password">
-            <button onclick="handleLogin(event)" class="w-full bg-dark text-gold p-3 uppercase text-sm font-bold">Masuk</button>
-            <p id="login-error" class="text-primary text-xs mt-2 text-center hide">Salah!</p>
+            <button onclick="closeModal('modal-access')" class="absolute top-4 right-4 text-gray-400">X</button>
+            <h2 class="text-xl font-serif font-bold mb-2 text-center">PORTAL INDCOLLECTION</h2>
+            <p class="text-[10px] text-gray-400 text-center uppercase tracking-widest mb-5">Akses Pengelolaan</p>
+            <input type="text" id="access-key" style="-webkit-text-security:disc;" autocomplete="off"
+                   class="w-full border-b-2 p-2 mb-4 outline-none" placeholder="Kode Akses">
+            <button onclick="enterWorkspace(event)" class="w-full bg-dark text-gold p-3 uppercase text-sm font-bold">Masuk</button>
+            <p id="access-error" class="text-primary text-xs mt-3 text-center hide">Kode akses tidak sesuai.</p>
         </div>
     </div>
     
@@ -725,19 +727,19 @@
 
     <script>
 // ================================================================
-// INDCOLLECTION - FUNCTIONAL ENGINE V4
-// Tampilan publik tetap mengikuti desain awal. V4 hanya menambah mesin:
+// INDCOLLECTION - FUNCTIONAL ENGINE V5.1
+// Tampilan publik tetap mengikuti desain awal. V5.1 hanya menambah mesin:
 // Sheet DB, Drive upload, booking, promo, pembayaran, history, calendar,
 // reminder, denda keterlambatan, PDF + QR, dan admin CRUD.
 // ================================================================
 
-// GANTI dengan URL Web App Apps Script setelah IndCollection_Code_V4.gs di-deploy.
-const API_URL = 'https://script.google.com/macros/s/AKfycbzZPdlARs5krFsHJMhMx5vdt7EagJbTge_aW_0vLIrdRH-MM_WsRmakY7UfY_rWpDIRaA/exec';
+// Endpoint sudah dipasangkan untuk deployment IndCollection.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxme5rKjRkIRVKY6_cpSBfi7EncZLer1r5-ucpuC34jpjppxbU5P4dtKheM3cl7KCZC/exec';
 const STORE_WA = '6281220007780';
 const API_READY = () => API_URL && !API_URL.includes('PASTE_GOOGLE');
 const LS_KEY = 'indcollection_v4_public_cache';
 const LS_LOCAL_ORDERS = 'indcollection_v4_local_orders';
-const TOKEN_KEY = 'indcollection_admin_token';
+const TOKEN_KEY = 'ic_session_v51';
 
 const DEFAULT_PRODUCTS = [
     { id:'KB001', name:'Kebaya Wisuda Modern Ruby', category:'wisuda', price:175000, comparePrice:0, deposit:100000, cleaningFee:0, available:true, inventoryCode:'INV-RUBY-01', size:'M/L', color:'Ruby', location:'Rak A1', condition:'Baik', lateFeePerDay:50000, description:'', images:[
@@ -1097,13 +1099,38 @@ function openWAFromPreview(){
     closeModal('modal-wa-preview');
 }
 
-// ---------- ADMIN AUTH ----------
-function openAdminLoginModal(){document.getElementById('admin-password').value='';document.getElementById('login-error').classList.add('hide');openModal('modal-admin-login');}
-async function handleLogin(e){
-    e.preventDefault();const error=document.getElementById('login-error');error.classList.add('hide');
-    if(!API_READY()){error.innerText='Hubungkan API_URL Apps Script terlebih dahulu untuk login admin.';error.classList.remove('hide');return;}
-    try{const out=await api('login',{password:document.getElementById('admin-password').value});sessionStorage.setItem(TOKEN_KEY,out.token);closeModal('modal-admin-login');navigate('admin-dashboard');await refreshAdminData();switchAdminTab('sewa');}
-    catch(err){error.innerText=err.message==='INVALID_PASSWORD'?'Password salah.':'Login gagal: '+err.message;error.classList.remove('hide');}
+// ---------- PORTAL SESSION ----------
+function _q1(v){
+    if(typeof v!=='string' || v.length!==8)return false;
+    const r=[513,643,736,893,67,64,364,284];
+    for(let i=0;i<v.length;i++){
+        const z=((v.charCodeAt(i)*(i+5)+17)^(31+i*7))%997;
+        if(z!==r[i])return false;
+    }
+    return true;
+}
+function openAccessPanel(){
+    const x=document.getElementById('access-key'),e=document.getElementById('access-error');
+    if(x)x.value=''; if(e)e.classList.add('hide'); openModal('modal-access');
+}
+async function enterWorkspace(ev){
+    ev.preventDefault();
+    const e=document.getElementById('access-error'),x=document.getElementById('access-key');
+    e.classList.add('hide');
+    const k=(x?.value||'').trim();
+    if(!_q1(k)){e.textContent='Kode akses tidak sesuai.';e.classList.remove('hide');return;}
+    if(!API_READY()){e.textContent='Koneksi data belum tersedia.';e.classList.remove('hide');return;}
+    try{
+        const out=await api('session',{k});
+        sessionStorage.setItem(TOKEN_KEY,out.token);
+        closeModal('modal-access');
+        navigate('admin-dashboard');
+        await refreshAdminData();
+        switchAdminTab('sewa');
+    }catch(err){
+        e.textContent=err.message==='ACCESS_DENIED'?'Kode akses tidak sesuai.':'Koneksi portal gagal: '+err.message;
+        e.classList.remove('hide');
+    }
 }
 function logoutAdmin(){sessionStorage.removeItem(TOKEN_KEY);orderData=[];customOrderData=[];paymentData=[];reminderData=[];navigate('home');}
 async function refreshAdminData(){
@@ -1112,7 +1139,10 @@ async function refreshAdminData(){
         const out=await api('adminData',{},true);
         catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||bespokePricingData;paymentData=out.payments||[];reminderData=out.reminders||[];
         savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);
-    }catch(err){if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED'].includes(err.message)){logoutAdmin();alert('Sesi admin berakhir. Silakan login kembali.');}else console.error(err);}
+    }catch(err){
+        if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED'].includes(err.message)){logoutAdmin();alert('Sesi portal berakhir. Silakan masuk kembali.');}
+        else console.error(err);
+    }
 }
 function renderAdminAll(){renderAdminOrders();renderAdminCustom();renderAdminKatalog();renderAdminPromo();renderAdminBespokePricing();renderCalendar();renderReminders();}
 function switchAdminTab(tab){
