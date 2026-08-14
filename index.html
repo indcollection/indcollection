@@ -180,7 +180,7 @@
                 <button onclick="navigate('home')" class="text-dark hover:text-primary transition-colors">Beranda</button>
                 <button onclick="navigate('catalog')" class="text-dark hover:text-primary transition-colors">Sewa Kebaya</button>
                 <button onclick="navigate('bespoke')" class="text-gold hover:text-primary transition-colors border-b border-transparent hover:border-primary pb-1">Bespoke / Custom</button>
-                <button onclick="openAccessPanel('admin')" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Portal</button>
+                <button onclick="openAccessPanel()" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Portal</button>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -193,7 +193,7 @@
             <button onclick="navigate('home'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Beranda</button>
             <button onclick="navigate('catalog'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Sewa Kebaya</button>
             <button onclick="navigate('bespoke'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide text-gold">Bespoke / Custom Dress</button>
-            <button onclick="openAccessPanel('admin'); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Portal Admin / Owner</button>
+            <button onclick="openAccessPanel(); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Portal Admin / Owner</button>
         </div>
     </nav>
 
@@ -296,7 +296,10 @@
                     <h2 class="text-3xl font-serif font-bold text-primary mb-2">Portal Manajemen</h2>
                     <p class="text-gray-500 text-sm">Kontrol penuh atas penyewaan, pesanan kustom, dan database katalog.</p>
                 </div>
-                <button onclick="logoutAdmin()" class="mt-4 md:mt-0 text-sm border border-dark text-dark px-6 py-2 hover:bg-dark hover:text-white transition-all uppercase tracking-wide">Keluar Sistem</button>
+                <div class="mt-4 md:mt-0 flex items-center gap-2">
+                    <span id="portal-role-badge" class="hide px-3 py-2 text-[9px] uppercase tracking-widest font-bold border"></span>
+                    <button onclick="logoutAdmin()" class="text-sm border border-dark text-dark px-6 py-2 hover:bg-dark hover:text-white transition-all uppercase tracking-wide">Keluar Sistem</button>
+                </div>
             </div>
             
             <div class="flex overflow-x-auto mb-6 space-x-1 border-b border-gray-200">
@@ -307,6 +310,7 @@
                 <button onclick="switchAdminTab('bespokeprice')" id="tab-bespokeprice" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Harga Bespoke</button>
                 <button onclick="switchAdminTab('calendar')" id="tab-calendar" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Kalender</button>
                 <button onclick="switchAdminTab('reminder')" id="tab-reminder" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Reminder</button>
+                <button onclick="openOwnerFinance()" id="tab-owner-finance" class="hide px-6 py-3 bg-gold text-dark hover:bg-goldLight font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Keuangan Owner</button>
             </div>
 
             <!-- PENYEWAAN -->
@@ -430,6 +434,7 @@
                     <p class="text-xs text-gray-500 mt-2 max-w-2xl">Dashboard khusus owner berbasis arus kas. Pembayaran sewa tercatat otomatis dari transaksi sistem; pemasukan lain dan pengeluaran dicatat melalui Buku Kas.</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
+                    <button onclick="backToOperations()" class="border border-primary text-primary px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">← Operasional</button>
                     <button onclick="openCashbookModal()" class="bg-primary text-white px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">+ Catat Kas</button>
                     <button onclick="generateFinancePDF()" class="bg-dark text-gold px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">Laporan PDF</button>
                     <button onclick="logoutPortal()" class="border border-dark text-dark px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">Keluar</button>
@@ -549,22 +554,21 @@
         </div>
     </footer>
 
-    <!-- PORTAL ACCESS V7 -->
+    <!-- PORTAL ACCESS V7.2 -->
     <div id="modal-access" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
         <div class="bg-white w-full max-w-md p-7 md:p-8 shadow-2xl animate-modal-pop border-t-4 border-primary relative">
             <button onclick="closeModal('modal-access')" class="absolute top-4 right-4 text-gray-400">X</button>
-            <div class="text-center mb-5">
+            <div class="text-center mb-6">
                 <h2 class="text-xl font-serif font-bold">PORTAL IND COLLECTION</h2>
-                <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Pilih akses sesuai kewenangan</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Akses Pengelolaan Terintegrasi</p>
             </div>
-            <input type="hidden" id="access-role" value="admin">
-            <div class="grid grid-cols-2 gap-2 mb-5">
-                <label class="portal-mode cursor-pointer"><input type="radio" name="portal-mode" value="admin" class="hidden" checked onchange="setAccessRole('admin')"><span class="block border border-gray-200 p-3 text-center transition"><b class="block text-xs uppercase tracking-wider">Admin</b><small class="text-[9px] opacity-70">Operasional</small></span></label>
-                <label class="portal-mode cursor-pointer"><input type="radio" name="portal-mode" value="owner" class="hidden" onchange="setAccessRole('owner')"><span class="block border border-gray-200 p-3 text-center transition"><b class="block text-xs uppercase tracking-wider">Owner</b><small class="text-[9px] opacity-70">Keuangan</small></span></label>
+            <div class="bg-lightBg border border-gray-100 p-4 text-[10px] text-gray-500 mb-5 leading-relaxed">
+                Satu portal untuk pengelolaan operasional. Akses Owner otomatis memperoleh seluruh menu Admin dan menu tambahan <b>Keuangan Owner</b>.
             </div>
-            <div id="access-role-desc" class="bg-lightBg border border-gray-100 p-3 text-[10px] text-gray-500 mb-4">Akses pengelolaan penyewaan, Bespoke, katalog, promo, kalender, dan reminder.</div>
+            <label for="access-key" class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Kode Akses</label>
             <input type="text" id="access-key" style="-webkit-text-security:disc;" autocomplete="off"
-                   class="w-full border-b-2 p-2 mb-4 outline-none" placeholder="Kode Akses">
+                   onkeydown="if(event.key==='Enter')enterWorkspace(event)"
+                   class="w-full border-b-2 p-2 mb-4 outline-none" placeholder="Masukkan kode akses">
             <button onclick="enterWorkspace(event)" class="w-full bg-dark text-gold p-3 uppercase text-sm font-bold">Masuk Portal</button>
             <p id="access-error" class="text-primary text-xs mt-3 text-center hide">Kode akses tidak sesuai.</p>
         </div>
@@ -949,7 +953,7 @@
 // ================================================================
 
 // Endpoint sudah dipasangkan untuk deployment IndCollection.
-const API_URL = 'https://script.google.com/macros/s/AKfycbw_3qtm-j6yzT-G9KY7xf_X0-QtPlIWYuWR3Y99qiCwB3Iyx3j9R0w9iTctPCCyldqW/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzrOo8dwohnSEeFf7okerprU2agmW8HK1rf2LdWalt1Izqeam5tZb7VCjB-IhKmtf0N/exec';
 const STORE_WA = '6281220007780';
 const BRAND_LOGO_DATA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARMAAAB1CAYAAABtcwVLAAAw5UlEQVR4nO3dd3wUZeLH8c8zs7M12U02vRJ6ERQVT7BgL1iwIPaC7ezn2UEsh0fVs5/9p56ejTsbFuxiQxARpff0ZNN3k+1l5vn9EdTjPBWlhIR5/5VXdnf2mdmZ7zzzPM88I6SUmEwm09ZSuroAJpOpZzDDxGQybRNmmJhMpm3CDBOTybRNmGFiMpm2CTNMTCbTNmGGiclk2ibMMDGZTNuEGSYmk2mbMMPEZDJtE2aY/Iz6Tz+Q5XNe7Tb3GtR98JGkxtdtymvqecww+Rmxeh9PTp2G75mnd/oDtOWN1+Ur9z8CvqauLoppF2aGyc/ItjmgpZVnpk2n49FHJC0751k//MKz8uW/3U3LmrWgWrq6OKZdmBkmP8MhFTwpKEoJnv3LFMLPvwSrl+8cgeJr6yzHCy/JOdPuIrFqHWUZmeB0dHHBTLsy81T2MzraI6RiSUgkcMfjPD1lCuenkrhc6ZLSMtGlhSvwio6Hn5Cv338/rtZWeqd5aDISkIx2abFMuzazZvIzNI8HuzeDYDRCVrqLPAHPTZvKkr/eAWtXd2kNpfnue+TsqVNxNrfh1gXxcIywnjJPDaYuZYbJz3CPGysOO/10EmlOqluasQjIRLL4tdf4aOJE2LhxxwdKk0+23jVTznvyCUqtFmx6CuxOGmNxjjztFMjx7vAimUzfE+ZMa79g40ZZ+eq/mfv4I1h8jWRoFhTVRsSikdZ/MCc/+AAMH7ZjLnmqK2Tlo4/w2VNPk5FMoqRUpMNFi7By9GV/pODMk6Bf/669/DLt0sww+TU1FTLw7js8cfNkchC4hYrAQksiRcGee3DcvXfB8D2330Fc75MIQe0jf2fuww+Rm0jgEBbiNieNKJx83Y1k3XS1GSKmLmde5vyakt4i4+LLxcUzZ9LscOCLxxGahWyLRuUX8/nghhthwRfbL5FTcdY/cB/vPvwovTQ7aVYHCauN8lSCM/96O1nnnrndvtpk+i3MmslvkHpltnzopom4gxHs7WEUQyeV7sQ9dCjHz5gJ+43atjWE6gq58t77mP/ii+SndIxQGNWTQavFwim33ULaiSdAXoFZKzHtFMww2VJ1PklRgeDNV+X9V1xBP10hW6j4Q+3UGwb2vUdy5tRpsP8fBPW1ksLirTvIN66TC2ZNZ/2ct3AE2inMziUoDZrTXJx5y62o555nhohpp2KGye/x7hz5wp+uJbqxkj75eTSFwtQJDc+AAVx480Q4cezWHejfLZbvzrqL8o8+JD+RItftoaotgK1Pb06ZOg3GHmcGiWmnY4bJ7/X+XDn7rzMIrN5AltWCTaZoaG/DXVLGaZMnwxGHgEWFnMLfduAvWSQ//ssdrHrrPXpleFFsVtb7/WSNGME5f7sXRm7Hxl6TaSuYYfJ7+OslmYWCRQvl8zfeQvvKleQkw3g1K/5ognaXk7Om34F9zFFQ2GvLD/4lX8q3rptI8+JlFGoOIokYjRaVrBF7M/7OO2GvPcwgMe20zN6c3yNzU23jDyPFWY/fT/FBo6gMRgnFJbaoxB2I8eQttxOe+zbUlG9ZWn80V8695gaSqyvIMCxYnC4CdjvWPQYz/u5pZpCYdnpmzWRbqFwv591wM+ve/oDeVhcWVVCV6KDNqXHOLZPIPXU85P1MDSVQL1myhLm3/ZXQmnLsCfDm5LKiqZGcvfdg3H0zYPgfzCAx7fTMMNlW1q+V790wmYbPviBHVYmkQsQ1Fb+qMP6aa8m78eafBkJrpeSL+cy5516iK9aSZ08nLjQ2BNrpfdBBHHv/3yDTBVm/sd3FZOoCZphsSxWVcsHNt7D4jTn0zfES9LchNDshu4NR55zN4BnTfwyFDp/kq4U8d9NEFF8jOaqdjmCIiDuDvgcdzH6zZkBRiRkipm7DDJNtbf06+fXf7mLx229QYnWhtIaIGZJmi5VDzzuL/pOugWgQli3jXzNmoG8sxy1UEqpCfSLOqLPOZK/JkyF3K8epmEw7mBkm20NjtVz74IO8fv/D9JUOshxpdEhJsx7nmPPPonD4MP51110Eq2soc3tobe+gPd3FYeefR58rLoGCLp4vxWT6Hcww2V4aquTKhx7n44f+D3c4QYbDRjQaJqoYWCwWLEkdCwKPx0NNIsaR115Dya2TBYBsrpUix6yZmLoXM0y2F1+FxGoj9e+3mD3zLiJVlfTKyiIajxANR8h0ZxLXDaIqjL36Tzim3G6Gh6lbM8Nke6veIPluOS9f8WfiTY2kknG83gwi0STBlM4F116DcsklUPYbBreZTDshc9Da9qYnaF61giZ/K1lZWWR6vSSSOhbViqHrfPrJJ9DQ0NWlNJm2mlkz2Z7aKuTX9/6dd/7+OH2FC3s0QSwZQ0XgtFhJGpI4Bml7DGPsY4/AXrubtRNTt2XWTLaHdp+kqVzOmzKND598lhKHm2Q8TsiQBBUrCVcaWO0ouqTE66X2u6W8OHEyfP3dzpnsLfU7Z7lMOxWzZrI9lG+QX90xhWVvzsUeiZHuSqchGCHpsHPZbZOxuN08ec1NKKEAA4sL8fnbabOlUbDvvhw3+XrYf+TW11Dq2ySF3p8uZ1W5pLEFEilId0JRNvT6Hz1H1TUSiwa6DqoKUkIqDjYr5Jsjck0/ZYbJtvbdUjlv5kyq3nufHGFBVVWaIjFiWdmcdNVl5Jw+Hiwq8tU3ePGee+mo2kBZfgGq4qQmGET2KuC8WyZiOWW8oKFOkl/0mw7ctc88J19+4mmEITjlgnMYcNGmSZQqK2Xth5/w8ezXaFi/EZGCiB6j/95DOHrCeXhPGdf5vvIN8rWnnmTFvM/JUDU0KTAScRQhcLrTGbH//gw5/ljYy5wKwbQ580kr29Ki+XL+X+9k4/sf0i87l7aOdhr1FKK0hEtnzoI99oCSAkFtvRRXXCLG5brl8zNmUlG+kT6OFL2s0FJewT//dD0nVlTLzDNO/81FCKz4Flm+FovVwYB0d+c/fQ0y9ea7zLvnfnw15WRlZJLpzqS5sZXkp/N4u2IDZ+UUSeWgkQKbRsfiBVjXrETXDZxZWYTaAmQIC3osweIFi9j4/nsc/8+nJX36mYFi+oEZJtvKx+/Id6bPJPjNSgZl59HU0kK7ZsHRtw8TZsyAow7/8cArLhSyqU7axp8hLshIl0/fNInG9Rso0VyUONII64J/z7qHsYkk+ReeK0kloXjLuo6NtjbS9QSatIGmga9ZUlHLe/94nlBlFSVFORx17NG43V7WLP6amsVf4a/3EW9swgEQCmHtCJKlQN+yvhwwdiya3c66+QtY9vmXOA2FwIZKVj//IoNvvXU7bUxTd2SGydaqrZesWc2b0+6kfdlqbJEUHSJOPD0NkZPJhAfugQMO/EkQiNxNly9HHCfOt1jl7Kv+THtDG6nmVlSrDbfVyr/uu58xRoL+F07Y4uK0NjahoGK3O8HtBanS/t1yNmwox5bhZsTJJ5J1yYVgtTIsN5OGdeuQ0RjhYKAzTFpbiQQjSKuD7EFD0E4+GTxuBowejbX3v1n48pu0h8Is+mwBg7fRJjT1DGZvztao88nU4sX8a8Ysahd9Q67dic3tpkmA1q83E556AvqW/fpyDjlSnHb3fUS9XqIuF9hsOG1W7JEYz915FxueeRZqt2CSpapK2dbQgAWJy5MBmRmgS9Yv+Q6bZkU4XAw44EDIywVPOnFNIxiNYbM5EJZNi29sIB4MkzIUlDQ3uFwQCsGo/UTZuHG0pQxs6R5iwXBnI63JtIkZJltjwQKenjiZjiXfMdCbQyAQoC4ZwTF0AKc89hD06w0FWziNwFFHijMefoBwbhYBm4WwnsCuwG45OTx5++2sfviRztG0v6SxgWhrKxYpSc/3QoYTQn5q1q7CJgSGUKC0L4TjEItTUVmFSIHL7sCV7gQgUVePiCYgliLdmQ66JBkOw4rlkmgUXVEwFAUpJUhjqzehqecww+R3Mp57Tj52441oPh9ZiqC5tYV4mpOcEXtw2n13wh7DBTm/8Zk2hx8uLn3sAUI5Hur1BDisKIkEvewOPvrHs6y49z5o+PnaQKKqAiMSQpAioygHHBZobSLQ3IgUBt6CPCgshF59BIpGXVUVNk1DSok9Iw2Ahrp6FF2iGynyCvOgfz+hFRXA0GFi46JF2OxWQvEI6VmZ0Mu8BcD0IzNMfov6WomvXjbd/6B8dPKtuNo7KNAsaEISzUij8OBRnPLEg7DnPr//IDv8CHHVkw+hDepDE5KOSJRcpxt7aweLXnqVFdNnQPmanwZKS71sqK5CNVJIjM6aidUAfz2xVJCkkiKnpBAsm37yQDtNlVVE4hHiRgK8WdBcL6sqa9AVSGlgK8iCynWSQAt8+aksXzgfmQhjc9kZPeaI372Kpp7JDJPforBYVDz9LM/OmIna2o7bopEydFpSCQYcfjCHTb0Deg8Rsm0rRowG6iUjDxJ/euA+MofuRnM8SdJQKMstQPW38+5Tz7Bg+gwoX7X5dyRTBFtbUVCQgDPNDUgItgMGmttBVnEBFOZ3Bl1HCENPork2/d+TCbEkzQ3NKLrAKSygWGH1OvT5i/hgynR8GzcSlUlyBvWm5KorzVqJaTNmb85vsPSmSfL9hx4nS0JRVjZ1jQ3YcjMZcexRDL3tFigsFQDCuxUjRDM2fXbfA8SFf7tXvjf9Tpa9/Q4ymSLHm4VHSD5/4SXC0QiHT75ZMmRPQc16iaFSs6GSWFzHk+WlrKQPxKGtog5N0fDH4/TbfSj4WiQF2cKorCSW0pFSp3+vMlBtkIBgUxB7XOHI0aP55I57aIh2EErE0FRoiYfpP3oUx11x6TbZnqaexQyTLVFXK1c+8CALnnuJHF2SabXT2BIgleFh0MGHMvSmm34Ikm1qr+HiqNv/Ir2eDOY99zy9VAUZizAsv4Rlb39IU0MjZz70gCQnB3xtNPrbSXk9tGgKcasdZ1Evsbq6TjYnk6QVFqLm5EJBtgBY3eCjKhqmMNODpagISktFav7XsiEWxWHVaEymaArH6Ejq4HCQclk5aszJDD19HOx9gFkrMf2EGSa/prFerr7nbj5+7GkykwZOYSEpBC0KjDjmWPabchuUbsd7VYYNEPtMuknGhcHq9z/ELRUS/jD5UqXxy8X84+zzmTBjOhwxRhx/4QS5cP4nDByxJ84TTxYAg44Zg613GY7MTOzDhv6w2Ky9d+eAi8+j0JFO2W7DAbDkZbP/xWfjVTWG9BtAcWsL0qphd7twlxVBSQFk/bbh/aZdh3lvzi+pr5Bf3foX1n/4KUpzG27NRlRCTSLBwReez16Tb4bC3B12cH1w9gWy+qPPKLU7CLe24I+0Q1Y6RnYWF95zHwzoB737COrWSooG/r5yNdRL80Y+0+9hNsD+nJr18pNJN7PynfewdgTJzfQSSCUpN5IccdUl7HXTdTs0SACOeO4pMeToo1nqa8Cw2MhwuHFEEsSq63jypsmwekPnG9Pc+CqW/b6zhBkkpt/JrJn8L5Xr5LxJk1n53geU2lyIpE5zOEw4LY2jr7yc/hdfCIVddNBtbJDfzryLeU//g2yLxGExwGGjOpLCO3gwE268BnHqODMQTDucGSb/bcN6+d4NN1D/2RcUWZ1EOoLI9DQabTZOuPbPFIwbB8W/cTDatramRq59+EG+eHk2lkgbSlLH7siiLZTA278P46feCiccI+L1FdJW2NsMFtMOYYbJf/r2Kzl3yjRq5y+kv8ONqhu0pRI0qArnTZ2K48gjuj5IvldRK1c8cB9znn0KrxRkJhWcqp2YhECagzOm30r6eefsHGU17RLMMPne/A/lx3/5C7VLlpPn9KAaKrWBAPGcXC6ZMR3O2AkvHXzNcu1bb/LklL8wOBbHG4uTbkujPhSBshLG/vkq3JddtPOV29QjmWEC8OnHct7kGwmv30C6PZ0UKvXBMPayPoyfNhXGHLHzHpDltXLdxx/w8o3XMcTuwGhuJ8ebR2MyTofHxfGTriXnj5fsvOU39Ri7dpg01UuWLOWN6TMRq1fjNAx0l4tWVSCKCjl96h3Quy/02vnbHdqfeFw+c/sUMjtieFBRhKQpFSNemMvYqy6n6M/X7fTrYOredt0wafZJFizkketuRGtoYYDHQzKZpMbQ8ew+mJPuuROKiiC7+3SVhp54Uv7z9r+S1hEkz2EFReJLxQm6XBx7yWX0vuAiKMjrNutj6l52zTDx1Ujj0y944PobyA6GybW7iCaTBFWFjD1357i7ZsIe3XDC5HqfTL73Hi9Mn4GttYl0Ae7MDNbU1KPkFzH6tNPpf9WVUNJ9AtLUfex6YVJTLWPz5vHY5FvJS+m4E0mSuqTNbqN41L4cMW0KDBnafQ+2mmrJ55/yxM0TUf0BXCmdDHcmNW0BEu4M9jvrDIb/6Sros/Nfupm6l10nTNpqJHGD8Ktv88/ps8hM6qQLsGoKVdEw7v1GMv7RR6BoO9ywt6M11sjYx5/w2G234w4GcesSYkliiqBepjjgtFMZdd214HJCSZ/ts751FRKpg1WD3O08iVJTjcQqOp/vE5NgCMj7jy78Vp8kawu79GsqJJoK+aWCNp/EMCB70/1I9fXyh8GKAZ8k41eW2eyTiBQgwFAhdycZVrCd7BphEqqXJA2ann2Rt+9+BEuzn6y0NEKxKBGboPSA/Tj0gfugtGedraMvz5bPTrmDVG0tuYAmIGToVIbDDD3uOE68fQoM3+uX17m6RupV5Sxd+AUdLc3IeJLSXmX03Xdf2G9052dr2yXFns6/v10h25cvZfnyxTQ3NmJzOUjPyuHAo46DPgOg6MdbECLLl8qarxaSSCTwDB5C6SGH/ViWKp9c/slHdFRU0BYPc9jlF+Es+a9Ha1RXyejKFVSuXArxdgwBLRHILC5j94MPg0EDBPW1El2n6ZNPqN+wkdb6OhTNQm5ZGf1H7Iv10EN/WGbVnNekb+GXaOEwNocdoapoNjv2dA8dSYGnMI+Sow6DYBvL35hDNJWiZMRoCg45ePNyfb5Aln85n4p1q0ik4tjSnPQfNIySP+wL++77P7d39M035Jqvv2bN0qU4nQ72OmA/Sg46CIYO7zb75K5x13A8ScNT/+SDR59C1NRSlJVHIKXTLCXDjjyK0XfOgOIeUCP5L45TThMXOV3y8dsmU7tuLZ5kEpdqYXBGJpXvz+OVjhjjps+SlJZAQc5P139thZw75TbWLVpAhsuGVTcINTWy0WpjnjuTsZdcJnPHnw7qpve//bZ8ZdYDbFzyHel2FY/HTXWgBWmzsvD5Vzhw7ImMvP46SUnnBE21X37GqzPvJGWxcsiNN1J6yGGbff3rM2ZBSytKlpvjzz1r87Kt3iA/nzWL5R99hFMYSCWBrmm0xFX2PvQIGH1I5/uWreS9+x6kbsUaNAyEaiAUycZwjMVZ2Yw46VS52/TbBdV1cvbd92KsWUNGIkGWy0U0HqMjlUTLzMafEuQP7MeEQw+g6q03ef+B+0kJC6MmGBQccvAPxaq/+1756ex/07B6Pdnp6YSjYVRNYbWcg5aTxbF/vFIW/fmKzm3d6JPkFYivr7tafjV7LkoogjPdRms8Sv2nCyia+zFjp9wqGTGiW+ybu8SNfsvufoiXZt2HrT1EvjeLjmSChlSCg849i9EzZwLd4rf6XdRjjhOXPfQQ1j5lGF4vqs2GXRdkGwL/dyt55rLLYcXyn35w4RI5+6rLaVzyDRkYYOgM3G0IQ/YYRk5WNvH2ALOfegr/Nws7g+iLz+RTkybSumYdZd5srIpKJBTCoVmwJZN4QmHWfPghvldf7lx+i0+GK8opUBRKXC6G9eu/+ffXlOPsCFCiaQzIzAJX+mYvL33yH9QuXEReMkUWkJmWgW5YyPRmMWRwf3BZ4Y1X5Xuz7qThu+XoHUGEFHgL83BlpOF12qCthc9mP0/N1JkSFQrzc3E5HOR43FjaQxRY7LgVC1np6ZSVlpCVkQltftpraskxoNCiUZab01mg+mpZeddM+cpjf6elYgMepwMhVDIyMjFSOk5SyOYGPv/ncyT/8WLn5UBegaiZfrv8bs4cRMBPfqaHHK+b0lwvqj9AzddLWPTaG1Dv6xaXDz27ZlJXJb+e+Te+efUNPJEEFrudsAY+qXPkJRcx4E9XQvH/eM5uT7PvAeKKRx6RD131J+rXlJMjBQUeL+saq0lEwjw98QaODVwjc8ef/cO2WPx/j9C8ZDGoBmPOOo2+kyYCBgQCfPLw48z/1+skW5rxt7aRuXq1XPHU04jmVhIpyB22F6eeewb0KYVEmEWPPsbKD74gUF7OF6+/wvhD9pdkZxGorMYpLKg2B550z2ZFNuoqSEYD6JoVl9MGyubnvfLvltBUXcGgXoUcdcUlcNzxEEtCJAJOO8gY3330LquWfI3D4mTAIQdx6IXnw7C+4G+mfs4c3njhJcKRdpYuW0yJcQZn33AdIGH1Wl68+jqi4RC7HXYQe99+O7gyIByC/Gyqq2qIB6KoTpWi0l6dBZo3j/cfehBPmo1wlosLrr8NBgyCvByo3sDLUybSsKGc5vJ1rPnsU4YdPlpSX8P8Z18gUVNHWq++nHz7JCjKILFkCbPvehgjpdNSVwOF3aOtpeeGSWW5nHPDRFoXf4vq7yDfm017IkqrRTDmkj/S95LLoGgXCJLvjTpEXPHY4/KFK28gsbEKX4ufXp4C2mIdNK1azex77+FUUjJv/AQh574uv3n7TXYrKaRFM+h71hkgBalQBEv/4WL/s86WZcP26TyL77MPVFbw5VtvYk/o5JT14+Cpd8CeuwnWr5VkFPCHG2+kfskqLAY0VlVCIAAOB8mmAC4sxJIGOFybFTfS0oxLgGIYFBTmgbHp5FzvkySTxFub8VgEyCTk50Ew1NnwmuEBuwbLv+WLue/idbooKOvPoVdcBUceKKirlOy1vyi0WeSRLidZjkw8gwZBSS+BTZNIA9auJ6YoaHYNZ2lx54z+3zfo1tbJtvpWnKoTiy0dtawvANWffII7HiFklZw44UI49OAfe8ycQh5/2nj+MX0WaipFzfJlDEvpsG4DsjVAmkVj8AH7whEHgRLFGmxFWFUcqtb5gPluomeGyfq18uPJt9G68GuUtgC9Cgqp9LcQSXdw5CUX0HfCeVC4hc+z6Un2HiXOnP2i/PeEC6lbsIhUPEKB10uaBZZ+t4wvnn6OcQccLld++CkeVcXX0sCwM06E3mXgLRGWXIiuK5eOEfuJshH7QW2dRFFYu3wZdlSsChx28kmQ7oLyConVCpEYuD3YPBkE/UEShgFWO/iDxJr9OKVAc6V1BsB/CFX5cKUEhkxRUFgMuk5ywzqp9RsgWLlCRptbKEzz0FbXxL+vuYGYy0O9nmSfscdy6FVXw8ZGohVN5HhzGTp8bxg8EOqaJEVlnb/7bvuKPrvtu/n2ye3sqVm7oUrGFSsxdOwFRZ1BUtcqKcoS1LUSaw7ixYqq2jrnzl2+Qq5YtAi7oiIzMyk443To3VtQ39jZo1XSV9j67iaVqMRjcWF0RCAaZ92Sb7EJIC2NvOF7gGaBYJhULEZCBw2V4oLiHbBjbBs9q82k1Sep2CDfuvoaqj79gjxdx23TqGqqI+Syccylf2TgzbcJCnfh572Ulojxjz5E2YEjaREp/PEoyXCIYs2BXtsAHVFEJIHDYqfV387QfUeCpnQ+sxhwDNjUlexrlKgKFBaIVCSCiCUx4kmyBw2CfmUC1dp5G4JmBykIBsO0BzuwpaeDywEdHXT424iEO+jdtzf07bvZbxLwNZFudWFNSyO/T1/o3UdoVnvni9XVWJJx9HgMV2YmjkwvNqeNzMxM7A4HJJNULPmOIk8WFgRZWVmde/p/9CTRUvuz7RC11T5sDjvSZiG776bLmKKsTevdRLy9AwBvbg4M7COwa4RbW4m3t1OYX/hD+04yGQd109dU12JEk7SHghQWF4KAQH0dejRKJBbFXVwKmYUCTw411Y10hKIYisKQ3ffY2l98h+lZNZP6Rt666WYaFiwiK57A5rCTtKvYC3I56cqryLzsql03RP7TgP7ixMful69degWVX35FscOFx9DIdXghkiKzoJRARxhvZg5VVTWURaNQsGmsRXmtrP30Y9YtXUKfPmWUHX+MjDXWk5XmorWphXBtDS6AXkWCDRUSq0r9v14h2NSKEIKBw4eB0wJ1VSREjDhxXB7tJ0X0twawuzMQaVYoKOz8Z2mpoKpKfvv+B6iJOB3xGLsfvj9Drr8O7I7OcSbZ2ZBbLCJ6XKqaQioRY/mKJYwItgK5nctZv1o2vD+Xj996WzrSvBxy2mlknDK+c/1qmqW/qgqVBFaXSlpO5o+F8nXIiK8GjBjSbiGtOBOaqiSJDlxWK5otnepl66ClHXJB67Wph7CuQi56Zy4WqwXpcLDXmENAj+H31UIqgSvTS+bg3Tu/IypYuXglUlgwNBuWwvztsANsHz0nTGpr5L+vvY7GhUso0DQc7jQqWltQ+5RwxvU34Dj/YjNI/lPvgeKk+++V70yZztJ336dYOAhFE5DlJWG1ENas2CW88c+X+NM+oyC3H5RXyxVPP8PsZ56mPRygoHcpk448mJyiIlaFwjjT3Lzw+OOMt9tkxh9GAYK6997m5aeeRqQSaF4vu40aBU4XtevXo9qsuBwaibY2ePc96YslKBjUD+xO6mpqCbe1EQ2qxNZtwP76XEnvUtCjrPpuCRZVxWlPI9eT3fmAdr8f4hFw2gAYeMAo3n31dbJQ2LB8FSNWrQIjJUGw7MknmT/ndVpbW3EVl5KRk/3jdgkHSYWC6AIs6WmIdPePrxW4RXugRUajIdqFHTXDBXYLeNxYC4uIxapwKTa+uv2v7Hv5pZJMD/F1a/jw5Veo+noJwmnHWVIIB+0P4RAtjQ247DbcOdmdl3m+RglW2luCpHtySCgqOB07dr/YCj0jTDZslK+ffyGxFcvoY3cQTERZGY5Bv75cPGMmjhNPMIPkfxk0TIy5a5bM3GM478+8F09GGhCh7JQxiJdfIuxrwt4Q5P/OuIBRhxwiKyoqqFy9nnRVYCvI56SLL4JBw0UpVmk8/RJ0hHH4O3h3+gzSLRqplEEokcChKtQKg1POPoOCY0+EglJhWOwynoBkMsn6Lxbz1VerqIxHGH368Yy66CJUJYXH4SBTUXj5nvsI2TUOOPkYhl50Lnanij8aozAzl69feQf1vc8IKQq1ms5Fj9+Hs2wwlpH7UDx6NHUfzSerqZ0nL7qcgoI8NAFNTS2kOsJkFRYzctxpcNAhP+4fsQ6isXYUlxPpzIQ072abrKHJhyvTQ0LqZBSXgrtI4IY9zjpbznv6WWK1PoIr1vLa+RcRikfRLDZiAtoicTL79uK8GdM6G4zXbAQdgrEUmZmeztpaXp5gY5UMtYWJpiRZRflQULBj94mt0P3bTFavkS9cfCltS5ZSotmwJuJEEnGGHHIg1z5wL24zSH5ZcakYOfEmse85Z7A+GYPWZug/RJx+7dXYyooxLCoa8On7b7Lsm4XYHRrubC8TrrmGQYcfCXW1kkFDxHl3TCFzj2E0xSMkkkmkbhCLhInqBkmXk/NunsTuF58Pm6r+2UMGk8zKotaARt0gqeukuxxkF+aDkLj79aVV0+hQVWKKQkIY5BQXgieNQ8afjKt/PyoiMfxJiT8Uwx9ox+FKxzl0WOd67TZcnHbrLQw98ihEpheHzUlDdTX1NdUkDJ38fgM48fwL2fOcCZtvj442WkkQsNuxlpSA8z+6rDdWyKVV5bSoBgG7HUv+jwd6zmVXiN1PGYeRk0NlSwuGgExPZ60mohuMPPFELvjrHXDEsQKrBuEgtYkk7Z507H36gFWBpmpJUyMN0TAtqoCcbLD99BJwZ9W9h9PP+0T+67a/EF63nuxYEiPYjsOdRjwng+Of/T/o1w9ydsFem9+j1ic3fvsNfY8/7sftVbFWBj77nI/efB2nw0p+fiGudC8DjhwDI0f9dLt++YXcsGgxjVVVxNtDCMVCn92H0uvg0bD7sJ+8P/jJh7Jm2XLsigWr5qQpGmK3w/fHNnSE4MsvZNXyNQjdoNnfRkKRjDr1JOg7SABEXp0jG1ZtIBWJgQoxmSBrcD+KzvqvqSpXbpStn33Oqm8WkowFERZBaf+B9B11YOc4kOL8zd9fWy6XvvMmLrsLq8dL6diTN3t90WMPSS0RQRqCvcYcAwOGbP75LxfIqq+/oqpyI5FoiJzsfAYM35P00Qf80FsEYCz/Rs57bQ6WRJQDjzoS5cAjfuh6/nL2q1gVFXdeNgPOPLXb7L/dN0xenSMfnzQJW3MTrniKDItGMh7DsCgYZQUc/8GbYLOBt+cNk99e4pU10la2KXwrNkjcLgh1dJ4dQx0QjYMzHVQ7lPURem2DVP/7YNyR6pslQoFEDBQDSn7mxFHjk2CARYAwIH8rxhc11knyigTN9ZKcn5nKYdMw+S1bXo0kr2ec8LpfmFQ3yOiHH/LitKk4/G24UnHshiQSjpKZ6aUpGMCf6eSP77wMex/WI36kHW3uzbdItbKaIbk5eL1pCJkkHo3x+VdfUTJgMHv++VoYPMTctqbNdK8G2Opa2fLaG/xj6jRyEymy7FYisQihRByLxUJrRwCb0460KBCLQbhW4tqFRrluI+ULF+Iqr6Ep4Mfu0ugI+nE6nbRHoiz/8huqa+s4YdZ0SU4e5JkTLZk6dZ8wqa2UvhdnM/f+h8mNRLEpkkA0SVLTsDkcFOXlU1mxEavNht1qob68nML9jzV39N+ivk5i6ORaFByKgaYKFD2Jy+EgEYri9XhwK1GWzX0Xf4efCY88BFakrhuo2WZo7+q6R29OQ5Vc9dgj/Pvev6G0NJGhCKxWK42RCC0WjSPOOY+9jz8OzWEnEOwgEgxRV14FzRXd7BquixUWCWJRIg0+2upqsQqDVCpJe3sHimIh3NqBV7UzwOOlacE3PHX+RbD4KzNITEB3CJOajXLNI4/y7sOPkJVKkeGyoditdCR1Ys40Rp12Op5r/ow/EKAt2I7dbkeR0FhRDaL7VLx2GqEIWtIgzZlGJGkQUCycMfFm/IZKXGrIhCQ9oTLYmUFq+TqevPpGePNlM7RNO3mYrF0uP516B6/87W6KNBuR1gAWq52IRaVVs3DsJZfyh4kTQVFpj8f4oTE5pZPwByGhd235u6MNGwm3BxCGRLHacObnwUEHc/q119CiaISwoKo2lGiSHCxY6pp46uZbSb09R9LcPebdMG0fO2+YrFou35t0M3UfzKNEUUlPCvIycmgIxgmlZXDqxEkMueIyKC0UlBSIQEcIixRYEChJg2BjC4TjXb0W3U5N+TqMVBKHzYYuDdqTKSguxHb6aRx66YWUpxJUx0LoNiuuNAd6RwdqQzP/nHgLfDIfaqvNQNlF7ZxhsnqZfOP662n86mtkXQOl6VlIKQhjwcjK5tBzz6P47DOhrOiHa/VwOIxVUVGFglUKYk1+aA104Up0T76qKjR0rBaIp+I0tLV19ox50tjtyj9y7u0343do+KVBOBYn1+3FnTKw1vh45OprMT75AqrNQNkV7XxhsmiBfObSy2n5bimWQDulnmxiwTgNoRgBh53jr72WsnPP/smcpYlEAqtQsSCwKxZoj0BVXVetRbflr6qGSIRkIoqiSTRB56yWRYWCvr1FwZkncd5fb8ZvgbiqIhQNF1aKrXa8oRD3XXU1wXfe6+rVMHWBnStMPn5XPnHFlYRWrcEVSVDoycLfHiQM2IqLOGfyJArHjYVePx1dqEiBIgToRufw7IRB09qNXbAS3VhDrYy2tJGuKggjgaaq2C0aJA3wNXTWNjRB3kljuXTWNJptVvwIkobAiMXIt1rJk5J/3HEH9ffda9ZOdjE7R5g0+yTvvyWfuuwyLJWVFEiFTNWOvy1IWLMRycrktEnXkXbiGCgt+mk3ZH2jVBAIQ5JKJLEJFYcuqF2zoQtWphtr9hNu9ZOhObAaEuJJZFKHSKJzxjSAglJBaR9hP+5wzr7zDto9Hpp0nZgqSSailKa7yAh18K+ZM2kyA2WX0vVh0lgjaWrg/y6/Gk9HjAyhoQgVf0qnHoHRp4xzpk9Du/hC8bNzthbmdXYC6ykMPYEqdKykCDTUg6/V3KG3kKyuorW+ESNpkEikSMaTaIrWOc1i37LNt73TQeZxx3DFo3/HMnQQDaqFDk2hvb0dr2ohNxHnvUf/Tu1d08ztv4vo2jDxV0s+msvzJ5yAp6Udp65hsblpFCrNudmMvPpyznr2aThz/K8Oiop0+HGqCukuDUNGcdgMfJXrIRzeEWvSI9QuX4rH5SQUiyNUO3G56Sl58ehP3+wtFGQXCo4+XJzz2osMO+9cmpwemlMGVk2jyKrhamxk/lNPsO6Wa81A2QV03aiulhqpv/Yqz06+BXdKwe700hCMEhaCYYcfykETJsCRh27xyErFkEhpgNCRpFBIosgEtAeA0u22Gj1GS52MtjQj9BSKomAIBaFaMaQE/VfG6xQUiRF338WIkfvLtx97mKoli8lIxnBoKtZIjE//+TxtHSE58rbbwBwt22N1WZi0/N+LvPPwY+RpWbRFg9Q7dMoOO4CzTh2H9cDRUPIbdzo9hSoEqqGgbDoPipQBjU3bofQ9kARfbS2GnkSzWJBSoqoqhmFAKrllyxh/ojh25F5y4wvP88ULLxJsaCQ9nCTHamXD2+9iTSbZa+oUSZY5LURP1CVhUj7zLvnWA49hi8awprlwDCxkzEUXkHXQ/r/71nZd1zsnApcSYUiEBENP0lRd/f00wqZfEonRUFWDSBloqgVpSFRV6QyTRGLLl1NSKvreNIm+x58g616bw7dvvEWgrgYSKea//RZ1wXaOnzFNUjLYDJQeZseGia9RrrjnAd5+9jkcVht5w4cx/IiDKRtzFOy551btXLqud9ZIDImiS4TRWTOp37jBDJMt4ffj9zXgMgyEChgS9fvHpiZiv315Q4aIoiFDKBo3Tla/NYdv3n8XvbmJqm+X8/ZNt3HstBkSexoUdOHkSqZtaoeGyWez7mLe7Jfp368PY8aPI/PA/aE4ny2eleoX6IYB0BkoUqIAQk/hq65i+NYufFfgayLVEUSTAvQUSANDplCEBsktvMz5XwYNEKWDbqD0uLEy8Pk83njpRb5e+DUNf76GC2fdBQXd51EOpl+2Y8Kkolo+OPEmjICfcydfQ++xx4LVBqoCOdvmOaq6NDDE92HSuUih6wR8vm2x+B7P8DWiJBJYEchU5yMppZ5CFRL0rQiT7w0aKDIGDeTco8fIVW++yeuvvcLdE2/guttukey1r1k76QG2e5jIugb52ksvsNf+I9n/mKOh30BBS40kexvOe9nqkylpoAtQBD/cPSwMSaIj0Dl606xO/6J4ezu2lIFVURGpFEJVQDdQED8+53dbKOklhlx+JUPGHCXffeEFnnj0ESZcqUpt9xHm79PNbfcwEUX54uRJEzf/57YMEoD2MJFonDQJqpQIVUFBYFFADwZh/VqzOv0rVi5ajNfuRIRDqEJisahYFIFMJZF6im1+pPfuL46efDv4quU2DStTl+kZswclkkhFgKp8f4WDYRgIw0AkEuAPdGnxuoNoawAtaWBVFFTDQAEsiooiIRaOsN2eK1dgdhP3FF0/nH5biCSQUiIFSCmQUmAYBooEJREj2WC2m/yi8irZVlePSCaxK0pnO4mhY1EECgZBM4xNW6BHhEkyEiG1qdHQMAwwOseaWJAoqRTNNbVdXMKdnN9Pe0sLFsNAEyB1A7GpvcQiBR0Bf1eX0NQN9IgwCUeCJDc9klLqBkJ2Nr5aFRWrodNSb85r8ksitfWkwjFsQqAiEdJAGjpC6mBIosFQVxfR1A30iDCJhyLIlN45yMqQqEKgyO+v+Q1a6n3gazFb+X5G1cYKNCmwqZYfx+gIgZHSEbpBLPI/bvQzmf5Lj2iATUUjaAIsqooiO0duGrJz5YSewt/cBN3tyYU7UG1lFTZVwSoVpAFWzQKqQkzqGEaSRPR3jIA17XJ6RM3EiCdRhYKqaKioCCGQQiGlKkSEQlMsCoU5Zq/Bz2hsb0O3WUlZVAyhoGhWsNnQEaR0nWQqjjnzvOnX9IgwiUTDRGLxzhCRkngqieZyUNnRRiI/lwPPPauri7hT23/sMTQSpxmdCIKEotKeTBJTBKrdSjQahU23K5hMP6dHhImCIN3lxDAMEobE7smkSU+ge7MYePihDL1gQlcXcafWe9zJ4ozrr6XD7SSoafjjSVCtaJoVoDNMzHqJ6Vf0iDAREizSIJmI4c7Oojlp0GyxMvCIIzhw0mTIMSfk+TV5F5zN6AvOpcmmEVY0VMWKHQ2iqc4pCIRZMzH9sh4RJtDZ+2B3u2k1dIIuJzl778OBU6dDSW8zSLZETqEovuIyRp56CsE0F1FVI2moWBUrMmGANMPE9Mt6RG8OAFYLKaBFlzgHDeCExx6D3uZQ7d8kr0TsdvNNMpIy+O6VOTjiSdJcHiKhGMgec94xbSc9Yg/RVYWWlE6LxYJzYH9Ouv8e6GsGye9SVCr2uX0yJQfuR9DtojIQQEtLN8PE9Kt6xB4SUy3oubnECgs46e8PwJ7DzSDZGoXF4ui/zaDkkIMQRfnE7U5A7epSmXZyPSJMohYVf1oaZ/39Idhj66Z/NG3St784bsZUyg46kIpwEArN+WBMv6xHhEnK4eCKWbOgsKiri9KzlJWKE265hcFHHt7VJTF1A0Kaw8xNJtM20CNqJiaTqeuZYWIymbYJM0xMJtM28f/BNrGV8VekVgAAAABJRU5ErkJggg==';
 const BRAND_DISPLAY = 'IND COLLECTION';
@@ -962,8 +966,8 @@ const PAYMENT_INFO = {
 const API_READY = () => API_URL && !API_URL.includes('PASTE_GOOGLE');
 const LS_KEY = 'indcollection_v4_public_cache';
 const LS_LOCAL_ORDERS = 'indcollection_v4_local_orders';
-const TOKEN_KEY = 'ic_session_v70';
-const ROLE_KEY = 'ic_role_v70';
+const TOKEN_KEY = 'ic_session_v72';
+const ROLE_KEY = 'ic_role_v72';
 
 const DEFAULT_PRODUCTS = [
     { id:'KB001', name:'Kebaya Wisuda Modern Ruby', category:'wisuda', price:175000, comparePrice:0, deposit:0, cleaningFee:0, available:true, inventoryCode:'INV-RUBY-01', size:'M/L', color:'Ruby', location:'Rak A1', condition:'Baik', lateFeePerDay:50000, description:'', images:[
@@ -1306,7 +1310,7 @@ function openWAFromPreview(){
     closeModal('modal-wa-preview');
 }
 
-// ---------- PORTAL SESSION V7 ----------
+// ---------- PORTAL SESSION V7.2 ----------
 function _qAdmin(v){
     if(typeof v!=='string' || v.length!==8)return false;
     const r=[513,643,736,893,67,64,364,284];
@@ -1319,52 +1323,45 @@ function _qOwner(v){
     for(let i=0;i<v.length;i++){const z=((v.charCodeAt(i)*(i+5)+17)^(31+i*7))%997;if(z!==r[i])return false;}
     return true;
 }
-function setAccessRole(role){
-    const r=role==='owner'?'owner':'admin';document.getElementById('access-role').value=r;
-    const desc=document.getElementById('access-role-desc');
-    if(desc)desc.textContent=r==='owner'
-        ?'Akses khusus owner: laporan keuangan, cashflow bulanan, buku kas, piutang, tren, dan report PDF.'
-        :'Akses pengelolaan penyewaan, Bespoke, katalog, promo, kalender, dan reminder.';
-    document.getElementById('access-error')?.classList.add('hide');
-    const x=document.getElementById('access-key');if(x)x.value='';
+function openAccessPanel(){
+    const x=document.getElementById('access-key'),e=document.getElementById('access-error');
+    if(x)x.value='';if(e)e.classList.add('hide');openModal('modal-access');setTimeout(()=>x?.focus(),80);
 }
-function openAccessPanel(role='admin'){
-    const r=role==='owner'?'owner':'admin';
-    const radio=document.querySelector(`input[name="portal-mode"][value="${r}"]`);if(radio)radio.checked=true;
-    setAccessRole(r);openModal('modal-access');
+function applyPortalRoleUI(){
+    const role=sessionStorage.getItem(ROLE_KEY)||'',owner=role==='owner';
+    const financeBtn=document.getElementById('tab-owner-finance');if(financeBtn)financeBtn.classList.toggle('hide',!owner);
+    const badge=document.getElementById('portal-role-badge');
+    if(badge){
+        badge.className='hide px-3 py-2 text-[9px] uppercase tracking-widest font-bold border';
+        if(owner){badge.textContent='OWNER · FULL ACCESS';badge.classList.remove('hide');badge.classList.add('border-gold','text-gold','bg-dark');}
+        else if(role==='ops'){badge.textContent='ADMIN · OPERASIONAL';badge.classList.remove('hide');badge.classList.add('border-gray-300','text-gray-500','bg-white');}
+    }
 }
 async function enterWorkspace(ev){
-    ev.preventDefault();
-    const err=document.getElementById('access-error'),x=document.getElementById('access-key'),mode=document.getElementById('access-role').value||'admin';
-    err.classList.add('hide');const k=(x?.value||'').trim();
-    const localOk=mode==='owner'?_qOwner(k):_qAdmin(k);
-    if(!localOk){err.textContent='Kode akses tidak sesuai.';err.classList.remove('hide');return;}
+    ev?.preventDefault?.();
+    const err=document.getElementById('access-error'),x=document.getElementById('access-key');err.classList.add('hide');
+    const k=(x?.value||'').trim(),localAdmin=_qAdmin(k),localOwner=_qOwner(k);
+    if(!localAdmin&&!localOwner){err.textContent='Kode akses tidak sesuai.';err.classList.remove('hide');return;}
     if(!API_READY()){err.textContent='Koneksi data belum tersedia.';err.classList.remove('hide');return;}
-    showProcessLoader(mode==='owner'?'Membuka Portal Owner':'Membuka Portal Admin','Memverifikasi akses dan menyiapkan data...',12);
+    showProcessLoader('Membuka Portal','Memverifikasi akses dan menyiapkan seluruh data operasional...',12);
     try{
-        const month=localISODate(new Date()).slice(0,7);
-        const out=await api('session',{k,mode,month},false,50000);sessionStorage.setItem(TOKEN_KEY,out.token);sessionStorage.setItem(ROLE_KEY,out.role||mode);
-        closeModal('modal-access');
-        if((out.role||mode)==='owner'){
-            ownerFinanceData=out.finance||null;ownerFinanceMonth=ownerFinanceData?.month||month;
-            navigate('owner-dashboard');document.getElementById('owner-finance-month').value=ownerFinanceMonth;renderOwnerFinance();
-            updateProcessLoader('Portal Owner Siap','Laporan keuangan berhasil dimuat.',100);
-        }else{
-            catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
-            savePublicCache();navigate('admin-dashboard');renderAdminAll();renderCatalog(activeCatalogFilter);switchAdminTab('sewa');
-            updateProcessLoader('Portal Admin Siap','Data operasional berhasil dimuat.',100);
-        }
-        await new Promise(r=>setTimeout(r,150));hideProcessLoader();
+        const month=localISODate(new Date()).slice(0,7),out=await api('session',{k,month},false,50000);
+        sessionStorage.setItem(TOKEN_KEY,out.token);sessionStorage.setItem(ROLE_KEY,out.role||'ops');
+        catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
+        if((out.role||'ops')==='owner'){ownerFinanceData=out.finance||null;ownerFinanceMonth=ownerFinanceData?.month||month;}else{ownerFinanceData=null;ownerFinanceMonth='';}
+        savePublicCache();closeModal('modal-access');navigate('admin-dashboard');renderAdminAll();renderCatalog(activeCatalogFilter);applyPortalRoleUI();switchAdminTab('sewa');
+        updateProcessLoader((out.role||'ops')==='owner'?'Portal Owner Siap':'Portal Admin Siap',(out.role||'ops')==='owner'?'Akses penuh operasional dan keuangan berhasil dimuat.':'Data operasional berhasil dimuat.',100);
+        await new Promise(r=>setTimeout(r,160));hideProcessLoader();
     }catch(e){hideProcessLoader();err.textContent=e.message==='ACCESS_DENIED'?'Kode akses tidak sesuai.':'Koneksi portal gagal: '+e.message;err.classList.remove('hide');}
 }
-function logoutPortal(){sessionStorage.removeItem(TOKEN_KEY);sessionStorage.removeItem(ROLE_KEY);ownerFinanceData=null;orderData=[];customOrderData=[];paymentData=[];reminderData=[];navigate('home');}
+function logoutPortal(){sessionStorage.removeItem(TOKEN_KEY);sessionStorage.removeItem(ROLE_KEY);ownerFinanceData=null;ownerFinanceMonth='';orderData=[];customOrderData=[];paymentData=[];reminderData=[];applyPortalRoleUI();navigate('home');}
 function logoutAdmin(){logoutPortal();}
 async function refreshAdminData(silent=false){
-    if(!getToken()||sessionStorage.getItem(ROLE_KEY)==='owner')return;
+    if(!getToken())return;
     try{
         const out=await api('adminData',{},true,45000,silent);
         catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
-        savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);
+        savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);applyPortalRoleUI();
     }catch(e){if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED','ROLE_DENIED'].includes(e.message)){logoutPortal();alert('Sesi portal berakhir. Silakan masuk kembali.');}else console.error(e);}
 }
 function renderAdminAll(){renderAdminOrders();renderAdminCustom();renderAdminKatalog();renderAdminPromo();renderAdminBespokePricing();renderCalendar();renderReminders();}
@@ -1372,6 +1369,13 @@ function switchAdminTab(tab){
     ['sewa','custom','katalog','promo','bespokeprice','calendar','reminder'].forEach(t=>{const btn=document.getElementById(`tab-${t}`),cont=document.getElementById(`admin-${t}-container`);if(!btn||!cont)return;if(t===tab){btn.className='px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap';cont.classList.remove('hide');}else{btn.className='px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap';cont.classList.add('hide');}});
     if(tab==='calendar')renderCalendar();if(tab==='reminder')renderReminders();
 }
+function openOwnerFinance(){
+    if(sessionStorage.getItem(ROLE_KEY)!=='owner'){alert('Menu Keuangan hanya tersedia untuk akses Owner.');return;}
+    const month=ownerFinanceMonth||localISODate(new Date()).slice(0,7);navigate('owner-dashboard');
+    const input=document.getElementById('owner-finance-month');if(input)input.value=month;
+    if(ownerFinanceData)renderOwnerFinance();else loadOwnerFinance();
+}
+function backToOperations(){if(!getToken())return navigate('home');navigate('admin-dashboard');applyPortalRoleUI();renderAdminAll();switchAdminTab('sewa');}
 
 // ---------- OWNER FINANCE V7 ----------
 function financeMonthLabel(month){
@@ -1755,12 +1759,12 @@ function togglePromoTarget(){const s=document.getElementById('promo-scope').valu
 async function submitPromo(e){e.preventDefault();const p={id:document.getElementById('promo-id').value,name:document.getElementById('promo-name').value.trim(),code:document.getElementById('promo-code').value.trim().toUpperCase(),type:document.getElementById('promo-type').value,value:Number(document.getElementById('promo-value').value),minTransaction:Number(document.getElementById('promo-min').value||0),startDate:document.getElementById('promo-start').value,endDate:document.getElementById('promo-end').value,scope:document.getElementById('promo-scope').value,target:document.getElementById('promo-target').value.trim(),active:document.getElementById('promo-active').value==='true'};try{const out=await api('upsertPromo',p,true);const saved=out.promo;const idx=promoData.findIndex(x=>x.id===saved.id);if(idx>=0)promoData[idx]=saved;else promoData.push(saved);savePublicCache();closeModal('modal-promo');renderAdminPromo();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal menyimpan promo: '+err.message);}}
 async function deletePromo(id){if(!confirm('Hapus promo ini?'))return;try{await api('deletePromo',{id},true);promoData=promoData.filter(x=>x.id!==id);savePublicCache();renderAdminPromo();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal: '+err.message);}}
 
-document.addEventListener('DOMContentLoaded',bootstrap);
+document.addEventListener('DOMContentLoaded',()=>{applyPortalRoleUI();bootstrap();});
 setInterval(()=>{
     if(!getToken())return;
     const role=sessionStorage.getItem(ROLE_KEY);
     if(role==='owner'&&!document.getElementById('view-owner-dashboard')?.classList.contains('hide'))loadOwnerFinance();
-    else if(role!=='owner'&&!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData(true);
+    else if(!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData(true);
 },120000);
 
     </script>
