@@ -60,7 +60,41 @@
         
         input:focus, textarea:focus, select:focus { border-color: #D4AF37 !important; box-shadow: 0 0 0 1px #D4AF37 !important; }
         
-        .hero-overlay { background: linear-gradient(to right, rgba(26,26,26,0.9) 0%, rgba(123,17,19,0.7) 100%); }
+        .hero-overlay {
+            background: linear-gradient(90deg,
+                rgba(16,10,11,0.98) 0%,
+                rgba(31,10,12,0.96) 24%,
+                rgba(73,9,13,0.88) 48%,
+                rgba(84,8,11,0.48) 72%,
+                rgba(26,26,26,0.12) 100%);
+        }
+        .hero-photo-ambient {
+            background-image: url('hero-indcollection.jpeg');
+            background-size: cover;
+            background-position: center 36%;
+            filter: blur(14px) saturate(.72) brightness(.52);
+            transform: scale(1.08);
+        }
+        .hero-photo-main {
+            object-position: 50% 35%;
+            filter: saturate(.88) contrast(1.03) brightness(.90);
+        }
+        .hero-photo-vignette {
+            background: linear-gradient(90deg,
+                rgba(26,26,26,0.92) 0%,
+                rgba(84,8,11,0.55) 42%,
+                rgba(84,8,11,0.12) 76%,
+                rgba(0,0,0,0.10) 100%);
+        }
+        @media (max-width: 767px) {
+            .hero-photo-main { object-position: 51% 34%; filter: saturate(.82) contrast(1.02) brightness(.72); }
+            .hero-overlay {
+                background: linear-gradient(180deg,
+                    rgba(26,26,26,0.22) 0%,
+                    rgba(84,8,11,0.62) 42%,
+                    rgba(20,10,11,0.96) 100%);
+            }
+        }
         
         /* Checkbox Custom styling */
         .custom-checkbox input:checked + div { background-color: #7B1113; border-color: #7B1113; }
@@ -95,6 +129,19 @@
         .gallery-image { max-width:none; transform-origin:center center; transition:transform .18s ease; }
         .brand-wordmark { letter-spacing:.18em; }
         .admin-toolbar-select { border:1px solid #E5E7EB; background:white; padding:.55rem .7rem; font-size:10px; text-transform:uppercase; letter-spacing:.08em; font-weight:600; }
+
+        /* V7 - owner financial intelligence. Same IND COLLECTION visual language. */
+        .finance-kpi { background:#fff; border:1px solid #EEE8DE; padding:1rem; min-height:108px; }
+        .finance-kpi .label { font-size:9px; text-transform:uppercase; letter-spacing:.14em; color:#6B7280; font-weight:700; }
+        .finance-kpi .value { font-family:"Cinzel",serif; font-size:1.45rem; font-weight:700; color:#1A1A1A; margin-top:.45rem; }
+        .finance-kpi .sub { font-size:9px; color:#9CA3AF; margin-top:.3rem; line-height:1.4; }
+        .finance-panel { background:#fff; border:1px solid #EEE8DE; box-shadow:0 10px 28px rgba(26,26,26,.04); }
+        .finance-bar-track { height:7px; background:#F3F4F6; overflow:hidden; }
+        .finance-bar-in { height:100%; background:#7B1113; }
+        .finance-bar-out { height:100%; background:#D4AF37; }
+        .finance-ledger-in { color:#15803D; font-weight:700; }
+        .finance-ledger-out { color:#B91C1C; font-weight:700; }
+        .portal-mode input:checked + span { background:#7B1113; color:white; border-color:#7B1113; box-shadow:0 0 0 1px #7B1113; }
     </style>
 </head>
 <body class="antialiased flex flex-col min-h-screen">
@@ -133,7 +180,7 @@
                 <button onclick="navigate('home')" class="text-dark hover:text-primary transition-colors">Beranda</button>
                 <button onclick="navigate('catalog')" class="text-dark hover:text-primary transition-colors">Sewa Kebaya</button>
                 <button onclick="navigate('bespoke')" class="text-gold hover:text-primary transition-colors border-b border-transparent hover:border-primary pb-1">Bespoke / Custom</button>
-                <button onclick="openAccessPanel()" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Admin</button>
+                <button onclick="openAccessPanel('admin')" class="text-xs bg-dark text-white hover:bg-primary px-5 py-2 rounded-sm transition-all duration-300">Portal</button>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -146,7 +193,7 @@
             <button onclick="navigate('home'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Beranda</button>
             <button onclick="navigate('catalog'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide">Sewa Kebaya</button>
             <button onclick="navigate('bespoke'); closeMobileMenu()" class="block w-full text-left py-2 font-medium tracking-wide text-gold">Bespoke / Custom Dress</button>
-            <button onclick="openAccessPanel(); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Admin Login</button>
+            <button onclick="openAccessPanel('admin'); closeMobileMenu()" class="block w-full text-left py-2 text-primary font-bold">Portal Admin / Owner</button>
         </div>
     </nav>
 
@@ -155,8 +202,16 @@
         
         <!-- ================= BERANDA ================= -->
         <section id="view-home" class="view-section animate-fade-in">
-            <div class="relative bg-dark h-[80vh] flex items-center overflow-hidden">
-                <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1595152772835-219674b2a8a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-40"></div>
+            <div class="relative bg-dark h-[80vh] min-h-[590px] flex items-center overflow-hidden border-b-4 border-primary">
+                <!-- V7.1 HERO: Foto asli Ind Collection dari user -->
+                <div class="absolute inset-0 hero-photo-ambient opacity-55"></div>
+                <div class="absolute inset-0 md:left-[41%] md:w-[59%] overflow-hidden">
+                    <img src="hero-indcollection.jpeg"
+                         alt="Kebaya hitam Ind Collection"
+                         class="hero-photo-main w-full h-full object-cover"
+                         fetchpriority="high">
+                </div>
+                <div class="absolute inset-0 hero-photo-vignette"></div>
                 <div class="absolute inset-0 hero-overlay"></div>
                 
                 <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center md:text-left">
@@ -365,6 +420,85 @@
             </div>
         </section>
 
+
+        <!-- ================= OWNER FINANCE DASHBOARD V7 ================= -->
+        <section id="view-owner-dashboard" class="view-section hide max-w-7xl mx-auto px-4 py-12 md:py-16 animate-fade-in">
+            <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-5 mb-8 border-b border-gray-200 pb-6">
+                <div>
+                    <span class="text-gold tracking-[0.22em] uppercase text-[10px] font-bold">Owner Financial Intelligence</span>
+                    <h2 class="text-3xl font-serif font-bold text-primary mt-1">Laporan Keuangan IND COLLECTION</h2>
+                    <p class="text-xs text-gray-500 mt-2 max-w-2xl">Dashboard khusus owner berbasis arus kas. Pembayaran sewa tercatat otomatis dari transaksi sistem; pemasukan lain dan pengeluaran dicatat melalui Buku Kas.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openCashbookModal()" class="bg-primary text-white px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">+ Catat Kas</button>
+                    <button onclick="generateFinancePDF()" class="bg-dark text-gold px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">Laporan PDF</button>
+                    <button onclick="logoutPortal()" class="border border-dark text-dark px-4 py-2.5 text-[10px] uppercase tracking-widest font-bold">Keluar</button>
+                </div>
+            </div>
+
+            <div class="finance-panel p-4 md:p-5 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3 justify-between">
+                    <div>
+                        <label for="owner-finance-month" class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Periode Laporan</label>
+                        <input id="owner-finance-month" type="month" onchange="loadOwnerFinance()" class="border border-gray-200 px-3 py-2 text-sm bg-white">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="loadOwnerFinance()" class="border border-primary text-primary px-4 py-2 text-[10px] uppercase tracking-widest font-bold">↻ Perbarui</button>
+                        <span id="owner-finance-period-label" class="self-center text-[10px] text-gray-400 uppercase tracking-widest"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="owner-finance-kpis" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-6"></div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-[1.45fr_.85fr] gap-6 mb-6">
+                <div class="finance-panel p-5">
+                    <div class="flex justify-between items-start gap-3 mb-5">
+                        <div><h3 class="font-serif font-bold text-lg text-dark">Cashflow Harian</h3><p class="text-[10px] text-gray-500 mt-1">Arus kas masuk dan keluar pada bulan terpilih.</p></div>
+                        <div class="text-[9px] text-gray-400"><span class="inline-block w-2 h-2 bg-primary mr-1"></span>Masuk &nbsp; <span class="inline-block w-2 h-2 bg-gold mr-1"></span>Keluar</div>
+                    </div>
+                    <div id="owner-cashflow-chart" class="overflow-x-auto"></div>
+                </div>
+                <div class="finance-panel p-5">
+                    <h3 class="font-serif font-bold text-lg text-dark">Kesehatan Bisnis</h3>
+                    <p class="text-[10px] text-gray-500 mt-1 mb-4">Indikator operasional yang mendukung keputusan owner.</p>
+                    <div id="owner-business-health" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="finance-panel p-5"><h3 class="font-serif font-bold text-base text-dark mb-4">Komposisi Pemasukan</h3><div id="owner-income-breakdown"></div></div>
+                <div class="finance-panel p-5"><h3 class="font-serif font-bold text-base text-dark mb-4">Komposisi Pengeluaran</h3><div id="owner-expense-breakdown"></div></div>
+                <div class="finance-panel p-5"><h3 class="font-serif font-bold text-base text-dark mb-4">Metode Penerimaan</h3><div id="owner-method-breakdown"></div></div>
+            </div>
+
+            <div class="finance-panel mb-6 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div><h3 class="font-serif font-bold text-lg text-dark">Buku Kas & Transaksi</h3><p class="text-[10px] text-gray-500 mt-1">Transaksi sistem tidak dapat dihapus. Catatan manual owner dapat diedit atau dihapus.</p></div>
+                    <select id="owner-ledger-filter" onchange="renderOwnerLedger()" class="admin-toolbar-select">
+                        <option value="all">Semua Transaksi</option>
+                        <option value="in">Kas Masuk</option>
+                        <option value="out">Kas Keluar</option>
+                        <option value="system">Pembayaran Sewa</option>
+                        <option value="manual">Buku Kas Manual</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50 text-[9px] uppercase tracking-wider text-gray-500"><tr>
+                            <th class="p-3 text-left">Tanggal</th><th class="p-3 text-left">Jenis</th><th class="p-3 text-left">Kategori / Keterangan</th><th class="p-3 text-left">Metode</th><th class="p-3 text-right">Nominal</th><th class="p-3 text-left">Referensi</th><th class="p-3 text-left">Aksi</th>
+                        </tr></thead>
+                        <tbody id="owner-ledger-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="finance-panel p-5">
+                <h3 class="font-serif font-bold text-lg text-dark mb-4">Tren 12 Bulan</h3>
+                <div id="owner-monthly-trend" class="overflow-x-auto"></div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -415,20 +549,27 @@
         </div>
     </footer>
 
-    <!-- PORTAL ACCESS -->
+    <!-- PORTAL ACCESS V7 -->
     <div id="modal-access" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
-        <div class="bg-white w-full max-w-sm p-8 shadow-2xl animate-modal-pop border-t-4 border-primary relative">
+        <div class="bg-white w-full max-w-md p-7 md:p-8 shadow-2xl animate-modal-pop border-t-4 border-primary relative">
             <button onclick="closeModal('modal-access')" class="absolute top-4 right-4 text-gray-400">X</button>
-            <h2 class="text-xl font-serif font-bold mb-2 text-center">PORTAL INDCOLLECTION</h2>
-            <p class="text-[10px] text-gray-400 text-center uppercase tracking-widest mb-5">Akses Pengelolaan</p>
+            <div class="text-center mb-5">
+                <h2 class="text-xl font-serif font-bold">PORTAL IND COLLECTION</h2>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Pilih akses sesuai kewenangan</p>
+            </div>
+            <input type="hidden" id="access-role" value="admin">
+            <div class="grid grid-cols-2 gap-2 mb-5">
+                <label class="portal-mode cursor-pointer"><input type="radio" name="portal-mode" value="admin" class="hidden" checked onchange="setAccessRole('admin')"><span class="block border border-gray-200 p-3 text-center transition"><b class="block text-xs uppercase tracking-wider">Admin</b><small class="text-[9px] opacity-70">Operasional</small></span></label>
+                <label class="portal-mode cursor-pointer"><input type="radio" name="portal-mode" value="owner" class="hidden" onchange="setAccessRole('owner')"><span class="block border border-gray-200 p-3 text-center transition"><b class="block text-xs uppercase tracking-wider">Owner</b><small class="text-[9px] opacity-70">Keuangan</small></span></label>
+            </div>
+            <div id="access-role-desc" class="bg-lightBg border border-gray-100 p-3 text-[10px] text-gray-500 mb-4">Akses pengelolaan penyewaan, Bespoke, katalog, promo, kalender, dan reminder.</div>
             <input type="text" id="access-key" style="-webkit-text-security:disc;" autocomplete="off"
                    class="w-full border-b-2 p-2 mb-4 outline-none" placeholder="Kode Akses">
-            <button onclick="enterWorkspace(event)" class="w-full bg-dark text-gold p-3 uppercase text-sm font-bold">Masuk</button>
+            <button onclick="enterWorkspace(event)" class="w-full bg-dark text-gold p-3 uppercase text-sm font-bold">Masuk Portal</button>
             <p id="access-error" class="text-primary text-xs mt-3 text-center hide">Kode akses tidak sesuai.</p>
         </div>
     </div>
-    
-    <!-- MODAL BOOKING SEWA -->
+<!-- MODAL BOOKING SEWA -->
     <div id="modal-booking" class="hide fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg">
         <div class="bg-white w-full max-w-xl p-8 shadow-2xl animate-modal-pop relative">
             <button onclick="closeModal('modal-booking')" class="absolute top-4 right-4 text-gray-400">X</button>
@@ -801,7 +942,7 @@
 
     <script>
 // ================================================================
-// INDCOLLECTION - FUNCTIONAL ENGINE V6.0
+// INDCOLLECTION - FUNCTIONAL ENGINE V7.1.1
 // Tampilan publik tetap mengikuti desain awal. V6.0 mengembangkan mesin:
 // Sheet DB, Drive upload, booking, promo, pembayaran, history, calendar,
 // reminder, denda keterlambatan, PDF + QR, dan admin CRUD.
@@ -821,7 +962,8 @@ const PAYMENT_INFO = {
 const API_READY = () => API_URL && !API_URL.includes('PASTE_GOOGLE');
 const LS_KEY = 'indcollection_v4_public_cache';
 const LS_LOCAL_ORDERS = 'indcollection_v4_local_orders';
-const TOKEN_KEY = 'ic_session_v52';
+const TOKEN_KEY = 'ic_session_v70';
+const ROLE_KEY = 'ic_role_v70';
 
 const DEFAULT_PRODUCTS = [
     { id:'KB001', name:'Kebaya Wisuda Modern Ruby', category:'wisuda', price:175000, comparePrice:0, deposit:0, cleaningFee:0, available:true, inventoryCode:'INV-RUBY-01', size:'M/L', color:'Ruby', location:'Rak A1', condition:'Baik', lateFeePerDay:50000, description:'', images:[
@@ -843,6 +985,9 @@ let paymentData = [];
 let reminderData = [];
 let availabilityData = [];
 let orderSortMode = 'newest';
+let ownerFinanceData = null;
+let ownerFinanceMonth = '';
+let currentCashbookEntry = null;
 let galleryItemId = '';
 let galleryIndex = 0;
 let galleryScale = 1;
@@ -912,7 +1057,7 @@ function loadLocalOrders(){ try{return JSON.parse(localStorage.getItem(LS_LOCAL_
 async function api(action, data={}, protectedAction=false, timeoutMs=45000, silent=false){
     if(!API_READY()) throw new Error('API_NOT_CONFIGURED');
     const loader=document.getElementById('ic-loader'),alreadyBusy=loader&&!loader.classList.contains('hide');
-    const labels={createOrder:'Menyimpan Booking',updateOrder:'Memperbarui Pesanan',addPayment:'Menyimpan Pembayaran',upsertProduct:'Menyimpan Katalog',deleteProduct:'Menghapus Katalog',upsertPromo:'Menyimpan Promo',deletePromo:'Menghapus Promo',createBespoke:'Mengirim Bespoke',updateBespoke:'Memperbarui Bespoke',upsertBespokePrice:'Menyimpan Harga',deleteBespokePrice:'Menghapus Harga',uploadFile:'Mengunggah File',refreshReminders:'Memperbarui Reminder',markReminderSent:'Memperbarui Reminder',customerHistory:'Memuat Riwayat',adminData:'Sinkronisasi Data'};
+    const labels={createOrder:'Menyimpan Booking',updateOrder:'Memperbarui Pesanan',addPayment:'Menyimpan Pembayaran',upsertProduct:'Menyimpan Katalog',deleteProduct:'Menghapus Katalog',upsertPromo:'Menyimpan Promo',deletePromo:'Menghapus Promo',createBespoke:'Mengirim Bespoke',updateBespoke:'Memperbarui Bespoke',upsertBespokePrice:'Menyimpan Harga',deleteBespokePrice:'Menghapus Harga',uploadFile:'Mengunggah File',refreshReminders:'Memperbarui Reminder',markReminderSent:'Memperbarui Reminder',customerHistory:'Memuat Riwayat',adminData:'Sinkronisasi Data',financeData:'Memuat Laporan Keuangan',upsertCashbook:'Menyimpan Buku Kas',deleteCashbook:'Menghapus Buku Kas'};
     if(!silent && !alreadyBusy && action!=='bootstrap' && action!=='session')showProcessLoader(labels[action]||'Memproses','Menghubungkan ke sistem IndCollection...',18);
     const payload={action,data,token:protectedAction?getToken():''};
     const body=new URLSearchParams({payload:JSON.stringify(payload)});
@@ -1161,50 +1306,186 @@ function openWAFromPreview(){
     closeModal('modal-wa-preview');
 }
 
-// ---------- PORTAL SESSION ----------
-function _q1(v){
+// ---------- PORTAL SESSION V7 ----------
+function _qAdmin(v){
     if(typeof v!=='string' || v.length!==8)return false;
     const r=[513,643,736,893,67,64,364,284];
-    for(let i=0;i<v.length;i++){
-        const z=((v.charCodeAt(i)*(i+5)+17)^(31+i*7))%997;
-        if(z!==r[i])return false;
-    }
+    for(let i=0;i<v.length;i++){const z=((v.charCodeAt(i)*(i+5)+17)^(31+i*7))%997;if(z!==r[i])return false;}
     return true;
 }
-function openAccessPanel(){
-    const x=document.getElementById('access-key'),e=document.getElementById('access-error');
-    if(x)x.value=''; if(e)e.classList.add('hide'); openModal('modal-access');
+function _qOwner(v){
+    if(typeof v!=='string' || v.length!==11)return false;
+    const r=[513,643,736,893,67,64,364,284,767,737,666];
+    for(let i=0;i<v.length;i++){const z=((v.charCodeAt(i)*(i+5)+17)^(31+i*7))%997;if(z!==r[i])return false;}
+    return true;
+}
+function setAccessRole(role){
+    const r=role==='owner'?'owner':'admin';document.getElementById('access-role').value=r;
+    const desc=document.getElementById('access-role-desc');
+    if(desc)desc.textContent=r==='owner'
+        ?'Akses khusus owner: laporan keuangan, cashflow bulanan, buku kas, piutang, tren, dan report PDF.'
+        :'Akses pengelolaan penyewaan, Bespoke, katalog, promo, kalender, dan reminder.';
+    document.getElementById('access-error')?.classList.add('hide');
+    const x=document.getElementById('access-key');if(x)x.value='';
+}
+function openAccessPanel(role='admin'){
+    const r=role==='owner'?'owner':'admin';
+    const radio=document.querySelector(`input[name="portal-mode"][value="${r}"]`);if(radio)radio.checked=true;
+    setAccessRole(r);openModal('modal-access');
 }
 async function enterWorkspace(ev){
     ev.preventDefault();
-    const e=document.getElementById('access-error'),x=document.getElementById('access-key');e.classList.add('hide');
-    const k=(x?.value||'').trim();if(!_q1(k)){e.textContent='Kode akses tidak sesuai.';e.classList.remove('hide');return;}
-    if(!API_READY()){e.textContent='Koneksi data belum tersedia.';e.classList.remove('hide');return;}
-    showProcessLoader('Membuka Portal','Memverifikasi akses dan menyiapkan dashboard...',12);
+    const err=document.getElementById('access-error'),x=document.getElementById('access-key'),mode=document.getElementById('access-role').value||'admin';
+    err.classList.add('hide');const k=(x?.value||'').trim();
+    const localOk=mode==='owner'?_qOwner(k):_qAdmin(k);
+    if(!localOk){err.textContent='Kode akses tidak sesuai.';err.classList.remove('hide');return;}
+    if(!API_READY()){err.textContent='Koneksi data belum tersedia.';err.classList.remove('hide');return;}
+    showProcessLoader(mode==='owner'?'Membuka Portal Owner':'Membuka Portal Admin','Memverifikasi akses dan menyiapkan data...',12);
     try{
-        const out=await api('session',{k},false,50000);updateProcessLoader('Akses diterima','Menyiapkan data operasional...',72);
-        sessionStorage.setItem(TOKEN_KEY,out.token);
-        catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||orderData.filter(o=>o.status!=='Cancelled').map(o=>({id:o.id,productId:o.productId,startDate:o.startDate,endDate:o.endDate,status:o.status}));
-        savePublicCache();closeModal('modal-access');navigate('admin-dashboard');renderAdminAll();renderCatalog(activeCatalogFilter);switchAdminTab('sewa');
-        updateProcessLoader('Portal Siap','Data berhasil dimuat.',100);await new Promise(r=>setTimeout(r,180));hideProcessLoader();
-    }catch(err){hideProcessLoader();e.textContent=err.message==='ACCESS_DENIED'?'Kode akses tidak sesuai.':'Koneksi portal gagal: '+err.message;e.classList.remove('hide');}
+        const month=localISODate(new Date()).slice(0,7);
+        const out=await api('session',{k,mode,month},false,50000);sessionStorage.setItem(TOKEN_KEY,out.token);sessionStorage.setItem(ROLE_KEY,out.role||mode);
+        closeModal('modal-access');
+        if((out.role||mode)==='owner'){
+            ownerFinanceData=out.finance||null;ownerFinanceMonth=ownerFinanceData?.month||month;
+            navigate('owner-dashboard');document.getElementById('owner-finance-month').value=ownerFinanceMonth;renderOwnerFinance();
+            updateProcessLoader('Portal Owner Siap','Laporan keuangan berhasil dimuat.',100);
+        }else{
+            catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
+            savePublicCache();navigate('admin-dashboard');renderAdminAll();renderCatalog(activeCatalogFilter);switchAdminTab('sewa');
+            updateProcessLoader('Portal Admin Siap','Data operasional berhasil dimuat.',100);
+        }
+        await new Promise(r=>setTimeout(r,150));hideProcessLoader();
+    }catch(e){hideProcessLoader();err.textContent=e.message==='ACCESS_DENIED'?'Kode akses tidak sesuai.':'Koneksi portal gagal: '+e.message;err.classList.remove('hide');}
 }
-function logoutAdmin(){sessionStorage.removeItem(TOKEN_KEY);orderData=[];customOrderData=[];paymentData=[];reminderData=[];navigate('home');}
+function logoutPortal(){sessionStorage.removeItem(TOKEN_KEY);sessionStorage.removeItem(ROLE_KEY);ownerFinanceData=null;orderData=[];customOrderData=[];paymentData=[];reminderData=[];navigate('home');}
+function logoutAdmin(){logoutPortal();}
 async function refreshAdminData(silent=false){
-    if(!getToken())return;
+    if(!getToken()||sessionStorage.getItem(ROLE_KEY)==='owner')return;
     try{
         const out=await api('adminData',{},true,45000,silent);
-        catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||orderData.filter(o=>o.status!=='Cancelled').map(o=>({id:o.id,productId:o.productId,startDate:o.startDate,endDate:o.endDate,status:o.status}));
+        catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
         savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);
-    }catch(err){
-        if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED'].includes(err.message)){logoutAdmin();alert('Sesi portal berakhir. Silakan masuk kembali.');}
-        else console.error(err);
-    }
+    }catch(e){if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED','ROLE_DENIED'].includes(e.message)){logoutPortal();alert('Sesi portal berakhir. Silakan masuk kembali.');}else console.error(e);}
 }
 function renderAdminAll(){renderAdminOrders();renderAdminCustom();renderAdminKatalog();renderAdminPromo();renderAdminBespokePricing();renderCalendar();renderReminders();}
 function switchAdminTab(tab){
     ['sewa','custom','katalog','promo','bespokeprice','calendar','reminder'].forEach(t=>{const btn=document.getElementById(`tab-${t}`),cont=document.getElementById(`admin-${t}-container`);if(!btn||!cont)return;if(t===tab){btn.className='px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap';cont.classList.remove('hide');}else{btn.className='px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap';cont.classList.add('hide');}});
     if(tab==='calendar')renderCalendar();if(tab==='reminder')renderReminders();
+}
+
+// ---------- OWNER FINANCE V7 ----------
+function financeMonthLabel(month){
+    if(!month)return'';const [y,m]=month.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+}
+async function loadOwnerFinance(){
+    if(sessionStorage.getItem(ROLE_KEY)!=='owner')return;
+    const month=document.getElementById('owner-finance-month')?.value||localISODate(new Date()).slice(0,7);
+    showProcessLoader('Memuat Laporan Keuangan',`Menghitung cashflow ${financeMonthLabel(month)}...`,18);
+    try{const out=await api('financeData',{month},true,50000,true);ownerFinanceData=out.finance;ownerFinanceMonth=out.finance.month;renderOwnerFinance();updateProcessLoader('Laporan Siap','Data keuangan berhasil diperbarui.',100);await new Promise(r=>setTimeout(r,120));}
+    catch(e){alert('Gagal memuat laporan: '+e.message);}finally{hideProcessLoader();}
+}
+function renderOwnerFinance(){
+    const f=ownerFinanceData;if(!f)return;
+    const monthInput=document.getElementById('owner-finance-month');if(monthInput&&!monthInput.value)monthInput.value=f.month;
+    document.getElementById('owner-finance-period-label').textContent=financeMonthLabel(f.month);
+    const kpis=[
+        ['Kas Masuk',formatRupiah(f.totalIn),'Pembayaran sewa + pemasukan manual'],
+        ['Kas Keluar',formatRupiah(f.totalOut),'Pengeluaran yang tercatat di Buku Kas'],
+        ['Net Cashflow',formatRupiah(f.netCashflow),f.netCashflow>=0?'Arus kas bulan ini positif':'Arus kas bulan ini negatif'],
+        ['Saldo Awal',formatRupiah(f.openingBalance),'Akumulasi arus kas sebelum periode'],
+        ['Saldo Akhir',formatRupiah(f.closingBalance),'Saldo awal + net cashflow'],
+        ['Piutang Aktif',formatRupiah(f.outstandingReceivable),`${f.outstandingOrders||0} transaksi belum lunas`]
+    ];
+    document.getElementById('owner-finance-kpis').innerHTML=kpis.map((k,i)=>`<div class="finance-kpi"><div class="label">${k[0]}</div><div class="value ${i===2&&f.netCashflow<0?'text-red-700':''}">${k[1]}</div><div class="sub">${k[2]}</div></div>`).join('');
+    renderOwnerDailyChart(f.daily||[]);
+    renderOwnerBreakdown('owner-income-breakdown',f.incomeBreakdown||{},'in');
+    renderOwnerBreakdown('owner-expense-breakdown',f.expenseBreakdown||{},'out');
+    renderOwnerBreakdown('owner-method-breakdown',f.methodBreakdown||{},'in');
+    const ratio=Number(f.collectionRate||0);
+    document.getElementById('owner-business-health').innerHTML=`
+        ${financeHealthRow('Nilai Booking Bulan Ini',formatRupiah(f.bookingValue||0),'Total nilai order dibuat pada periode')}
+        ${financeHealthRow('Pembayaran Sewa Bulan Ini',formatRupiah(f.rentalCash||0),'Kas yang benar-benar diterima')}
+        ${financeHealthRow('Collection Rate',ratio.toFixed(1)+'%','Akumulasi paid vs nilai order aktif')}
+        ${financeHealthRow('Pipeline Bespoke',formatRupiah(f.bespokePipeline||0),'Quotation aktif yang belum selesai')}
+        ${financeHealthRow('Order Bulan Ini',String(f.ordersThisMonth||0),'Tidak termasuk cancelled')}`;
+    renderOwnerLedger();
+    renderOwnerTrend(f.trend||[]);
+}
+function financeHealthRow(label,value,note){return `<div class="border-b border-gray-100 pb-3"><div class="flex justify-between gap-3"><span class="text-[10px] text-gray-500">${escapeHtml(label)}</span><b class="text-xs text-dark">${escapeHtml(value)}</b></div><div class="text-[9px] text-gray-400 mt-1">${escapeHtml(note)}</div></div>`;}
+function renderOwnerBreakdown(id,obj,type){
+    const el=document.getElementById(id);if(!el)return;const rows=Object.entries(obj||{}).sort((a,b)=>b[1]-a[1]),max=Math.max(1,...rows.map(x=>Number(x[1]||0)));
+    el.innerHTML=rows.length?rows.map(([k,v])=>`<div class="mb-3"><div class="flex justify-between gap-3 text-[10px] mb-1"><span>${escapeHtml(k)}</span><b>${formatRupiah(v)}</b></div><div class="finance-bar-track"><div class="${type==='out'?'finance-bar-out':'finance-bar-in'}" style="width:${Math.max(2,Number(v)/max*100)}%"></div></div></div>`).join(''):'<p class="text-xs text-gray-400">Belum ada data pada periode ini.</p>';
+}
+function renderOwnerDailyChart(daily){
+    const el=document.getElementById('owner-cashflow-chart');if(!el)return;const max=Math.max(1,...daily.flatMap(x=>[Number(x.in||0),Number(x.out||0)]));
+    el.innerHTML=`<div class="min-w-[680px] flex items-end gap-1 h-52 border-b border-gray-200 pt-4">${daily.map(d=>{const hi=Math.max(2,Number(d.in||0)/max*150),ho=Math.max(2,Number(d.out||0)/max*150);return `<div class="flex-1 h-full flex flex-col justify-end items-center group" title="${dateShortID(d.date)} · Masuk ${formatRupiah(d.in)} · Keluar ${formatRupiah(d.out)}"><div class="w-full flex items-end justify-center gap-[2px] h-[160px]"><div class="bg-primary/80 w-[42%]" style="height:${hi}px"></div><div class="bg-gold w-[42%]" style="height:${ho}px"></div></div><div class="text-[7px] text-gray-400 mt-1">${String(Number(d.date.slice(-2)))}</div></div>`}).join('')}</div>`;
+}
+function renderOwnerLedger(){
+    const f=ownerFinanceData,el=document.getElementById('owner-ledger-table');if(!f||!el)return;const filter=document.getElementById('owner-ledger-filter')?.value||'all';
+    let rows=[...(f.ledger||[])];
+    rows=rows.filter(x=>filter==='all'||(filter==='in'&&x.direction==='IN')||(filter==='out'&&x.direction==='OUT')||(filter==='system'&&x.source==='SYSTEM')||(filter==='manual'&&x.source==='MANUAL'));
+    el.innerHTML=rows.length?rows.map(x=>`<tr class="border-b border-gray-100 hover:bg-gray-50"><td class="p-3 text-[10px] whitespace-nowrap">${dateID(x.date)}</td><td class="p-3"><span class="${x.direction==='IN'?'bg-green-50 text-green-700':'bg-red-50 text-red-700'} px-2 py-1 text-[9px] font-bold">${x.direction==='IN'?'MASUK':'KELUAR'}</span></td><td class="p-3"><b class="text-[10px]">${escapeHtml(x.category)}</b><div class="text-[9px] text-gray-500 mt-1 max-w-xs">${escapeHtml(x.description||'')}</div></td><td class="p-3 text-[10px]">${escapeHtml(x.method||'-')}</td><td class="p-3 text-right text-xs ${x.direction==='IN'?'finance-ledger-in':'finance-ledger-out'}">${x.direction==='IN'?'+ ':'- '}${formatRupiah(x.amount)}</td><td class="p-3 text-[9px] text-gray-500">${escapeHtml(x.reference||x.id||'-')}${x.proofUrl?`<br><a href="${escapeHtml(x.proofUrl)}" target="_blank" class="text-primary underline">Bukti</a>`:''}</td><td class="p-3">${x.source==='MANUAL'?`<div class="flex gap-1"><button onclick="openCashbookModal('${x.id}')" class="border px-2 py-1 text-[9px] font-bold">Edit</button><button onclick="deleteCashbook('${x.id}')" class="border border-primary text-primary px-2 py-1 text-[9px] font-bold">Hapus</button></div>`:'<span class="text-[8px] text-gray-400 uppercase">Sistem</span>'}</td></tr>`).join(''):'<tr><td colspan="7" class="p-8 text-center text-gray-400 text-xs">Belum ada transaksi pada filter ini.</td></tr>';
+}
+function renderOwnerTrend(trend){
+    const el=document.getElementById('owner-monthly-trend');if(!el)return;const max=Math.max(1,...trend.flatMap(x=>[Number(x.in||0),Number(x.out||0)]));
+    el.innerHTML=`<div class="min-w-[680px]"><div class="grid grid-cols-12 gap-2 items-end h-48">${trend.map(x=>`<div class="h-full flex flex-col justify-end"><div class="flex items-end gap-1 h-36"><div class="flex-1 bg-primary" style="height:${Math.max(2,Number(x.in||0)/max*135)}px" title="Masuk ${formatRupiah(x.in)}"></div><div class="flex-1 bg-gold" style="height:${Math.max(2,Number(x.out||0)/max*135)}px" title="Keluar ${formatRupiah(x.out)}"></div></div><div class="text-[8px] text-center text-gray-500 mt-2">${escapeHtml(x.label)}</div><div class="text-[8px] text-center ${x.net>=0?'text-green-700':'text-red-700'}">${x.net>=0?'+':''}${formatRupiah(x.net).replace('Rp ','')}</div></div>`).join('')}</div></div>`;
+}
+const CASH_CATEGORIES={
+    OUT:['Bahan & Produksi','Gaji / Freelance','Sewa & Utilitas','Marketing','Transportasi','Maintenance','Perlengkapan','Pajak & Admin Bank','Refund Pelanggan','Lainnya'],
+    IN:['Bespoke','Pemasukan Lain','Modal Owner','Refund Masuk','Lainnya']
+};
+function renderCashbookCategories(){
+    const d=document.getElementById('cashbook-direction').value,sel=document.getElementById('cashbook-category'),current=sel.value;
+    sel.innerHTML=(CASH_CATEGORIES[d]||[]).map(x=>`<option>${x}</option>`).join('');if([...sel.options].some(o=>o.value===current))sel.value=current;
+}
+function openCashbookModal(id=''){
+    if(sessionStorage.getItem(ROLE_KEY)!=='owner')return;
+    document.getElementById('cashbook-form').reset();document.getElementById('cashbook-id').value='';document.getElementById('cashbook-date').value=nowISODate();document.getElementById('cashbook-direction').value='OUT';renderCashbookCategories();document.getElementById('cashbook-proof-url').value='';document.getElementById('cashbook-proof-fileid').value='';
+    if(id&&ownerFinanceData){const x=(ownerFinanceData.cashbook||[]).find(e=>e.id===id);if(x){currentCashbookEntry=x;document.getElementById('cashbook-modal-title').textContent='Edit Transaksi Kas';document.getElementById('cashbook-id').value=x.id;document.getElementById('cashbook-date').value=x.date;document.getElementById('cashbook-direction').value=x.direction;renderCashbookCategories();document.getElementById('cashbook-category').value=x.category;document.getElementById('cashbook-description').value=x.description;document.getElementById('cashbook-amount').value=x.amount;document.getElementById('cashbook-method').value=x.method||'Transfer';document.getElementById('cashbook-reference').value=x.reference||'';document.getElementById('cashbook-notes').value=x.notes||'';document.getElementById('cashbook-proof-url').value=x.proofUrl||'';document.getElementById('cashbook-proof-fileid').value=x.proofFileId||'';}}
+    else{currentCashbookEntry=null;document.getElementById('cashbook-modal-title').textContent='Catat Transaksi Kas';}
+    openModal('modal-cashbook');
+}
+async function submitCashbook(e){
+    e.preventDefault();if(sessionStorage.getItem(ROLE_KEY)!=='owner')return;
+    showProcessLoader('Menyimpan Buku Kas','Mencatat transaksi ke spreadsheet...',20);
+    try{
+        let proofUrl=document.getElementById('cashbook-proof-url').value,proofFileId=document.getElementById('cashbook-proof-fileid').value;
+        const file=document.getElementById('cashbook-proof').files[0];
+        if(file){updateProcessLoader('Mengunggah Bukti','Menyimpan file ke Google Drive / Finance Receipts...',40);const up=await uploadAdminFile(file,'finance','Finance');proofUrl=up.url;proofFileId=up.fileId;}
+        const payload={id:document.getElementById('cashbook-id').value,date:document.getElementById('cashbook-date').value,direction:document.getElementById('cashbook-direction').value,category:document.getElementById('cashbook-category').value,description:document.getElementById('cashbook-description').value.trim(),amount:Number(document.getElementById('cashbook-amount').value||0),method:document.getElementById('cashbook-method').value,reference:document.getElementById('cashbook-reference').value.trim(),notes:document.getElementById('cashbook-notes').value.trim(),proofUrl,proofFileId};
+        updateProcessLoader('Menyimpan Buku Kas','Memperbarui cashflow dan laporan...',75);await api('upsertCashbook',payload,true,50000,true);closeModal('modal-cashbook');await loadOwnerFinance();
+    }catch(e2){hideProcessLoader();alert('Gagal menyimpan Buku Kas: '+e2.message);}
+}
+async function deleteCashbook(id){
+    if(!confirm('Hapus catatan kas manual ini?'))return;showProcessLoader('Menghapus Catatan','Memperbarui Buku Kas...',30);
+    try{await api('deleteCashbook',{id},true,45000,true);await loadOwnerFinance();}catch(e){hideProcessLoader();alert('Gagal menghapus: '+e.message);}
+}
+function generateFinancePDF(){
+    const f=ownerFinanceData;if(!f||!window.jspdf){alert('Data laporan atau library PDF belum siap.');return;}
+    showProcessLoader('Membuat Laporan PDF','Menyusun laporan cashflow dan transaksi...',25);
+    try{
+        const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=15;let y=16;
+        try{doc.addImage(BRAND_LOGO_DATA,'PNG',M,8,36,15);}catch(e){}
+        doc.setFont('helvetica','bold');doc.setTextColor(123,17,19);doc.setFontSize(17);doc.text('IND COLLECTION',55,16);
+        doc.setFontSize(7);doc.setTextColor(100);doc.text('OWNER FINANCIAL REPORT',55,22);
+        doc.setFontSize(13);doc.setTextColor(26);doc.text('LAPORAN KEUANGAN BULANAN',195,15,{align:'right'});
+        doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text(financeMonthLabel(f.month),195,21,{align:'right'});doc.text('Dibuat: '+new Date().toLocaleString('id-ID'),195,26,{align:'right'});doc.setDrawColor(212,175,55);doc.line(M,31,195,31);y=40;
+        const box=(x,label,value,w=55)=>{doc.setFillColor(253,251,247);doc.roundedRect(x,y,w,20,2,2,'F');doc.setFontSize(7);doc.setTextColor(100);doc.text(label.toUpperCase(),x+4,y+6);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(26);doc.text(value,x+4,y+14);doc.setFont('helvetica','normal');};
+        box(M,'Kas Masuk',formatRupiah(f.totalIn));box(76,'Kas Keluar',formatRupiah(f.totalOut));box(137,'Net Cashflow',formatRupiah(f.netCashflow));y+=28;
+        box(M,'Saldo Awal',formatRupiah(f.openingBalance));box(76,'Saldo Akhir',formatRupiah(f.closingBalance));box(137,'Piutang Aktif',formatRupiah(f.outstandingReceivable));y+=30;
+        const heading=t=>{doc.setFont('helvetica','bold');doc.setTextColor(123,17,19);doc.setFontSize(9);doc.text(t,M,y);y+=6;doc.setDrawColor(235);doc.line(M,y,195,y);y+=5;};
+        const row=(a,b)=>{doc.setFont('helvetica','normal');doc.setTextColor(55);doc.setFontSize(8);doc.text(String(a),M+2,y);doc.setFont('helvetica','bold');doc.text(String(b),195,y,{align:'right'});doc.setFont('helvetica','normal');y+=6;};
+        heading('RINGKASAN BISNIS');row('Pembayaran sewa bulan ini',formatRupiah(f.rentalCash));row('Pemasukan manual',formatRupiah(f.manualIncome));row('Nilai booking bulan ini',formatRupiah(f.bookingValue));row('Order bulan ini',String(f.ordersThisMonth));row('Collection rate',Number(f.collectionRate||0).toFixed(1)+'%');row('Pipeline Bespoke',formatRupiah(f.bespokePipeline));y+=4;
+        heading('KOMPOSISI PEMASUKAN');Object.entries(f.incomeBreakdown||{}).sort((a,b)=>b[1]-a[1]).forEach(x=>row(x[0],formatRupiah(x[1])));
+        y+=4;heading('KOMPOSISI PENGELUARAN');const ex=Object.entries(f.expenseBreakdown||{}).sort((a,b)=>b[1]-a[1]);if(!ex.length)row('Tidak ada pengeluaran tercatat','-');else ex.forEach(x=>row(x[0],formatRupiah(x[1])));
+        y+=4;heading('ARUS KAS 12 BULAN TERAKHIR');(f.trend||[]).forEach(x=>row(x.label,`Masuk ${formatRupiah(x.in)} | Keluar ${formatRupiah(x.out)} | Net ${formatRupiah(x.net)}`));
+        doc.addPage();y=18;heading('DETAIL TRANSAKSI PERIODE');
+        const ledger=f.ledger||[];ledger.forEach((x,idx)=>{if(y>275){doc.addPage();y=18;heading('DETAIL TRANSAKSI - LANJUTAN');}doc.setFontSize(7.5);doc.setTextColor(55);doc.text(`${dateID(x.date)}  ${x.direction==='IN'?'+':'-'} ${formatRupiah(x.amount)}`,M,y);doc.text(`${x.category} · ${x.description||''}`.slice(0,86),65,y);doc.text((x.reference||x.id||'').slice(0,22),195,y,{align:'right'});y+=6;});
+        if(!ledger.length){row('Tidak ada transaksi pada periode ini','-');}
+        y=Math.min(282,y+6);doc.setFontSize(7);doc.setTextColor(120);doc.text('Basis laporan: cash basis. Pembayaran sewa diambil otomatis dari Payments; transaksi manual dari Cashbook.',M,289);
+        updateProcessLoader('PDF Siap','Laporan keuangan berhasil dibuat.',100);setTimeout(()=>hideProcessLoader(),120);
+        doc.save(`IND-COLLECTION_Laporan-Keuangan_${f.month}.pdf`);
+    }catch(e){hideProcessLoader();alert('Gagal membuat laporan PDF: '+e.message);}
 }
 
 // ---------- ADMIN ORDERS / PAYMENT ----------
@@ -1475,7 +1756,12 @@ async function submitPromo(e){e.preventDefault();const p={id:document.getElement
 async function deletePromo(id){if(!confirm('Hapus promo ini?'))return;try{await api('deletePromo',{id},true);promoData=promoData.filter(x=>x.id!==id);savePublicCache();renderAdminPromo();renderCatalog(activeCatalogFilter);}catch(err){alert('Gagal: '+err.message);}}
 
 document.addEventListener('DOMContentLoaded',bootstrap);
-setInterval(()=>{if(getToken()&&!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData(true);},90000);
+setInterval(()=>{
+    if(!getToken())return;
+    const role=sessionStorage.getItem(ROLE_KEY);
+    if(role==='owner'&&!document.getElementById('view-owner-dashboard')?.classList.contains('hide'))loadOwnerFinance();
+    else if(role!=='owner'&&!document.getElementById('view-admin-dashboard')?.classList.contains('hide'))refreshAdminData(true);
+},120000);
 
     </script>
 </body>
