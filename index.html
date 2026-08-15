@@ -141,6 +141,13 @@
         .finance-bar-out { height:100%; background:#D4AF37; }
         .finance-ledger-in { color:#15803D; font-weight:700; }
         .finance-ledger-out { color:#B91C1C; font-weight:700; }
+
+        /* V7.3 — Bespoke portfolio manager */
+        .portfolio-card { position:relative; overflow:hidden; min-height:24rem; background:#EEEAE3; cursor:zoom-in; }
+        .portfolio-card img { transition:transform .7s ease, filter .4s ease; }
+        .portfolio-card:hover img { transform:scale(1.045); }
+        .portfolio-admin-thumb { width:64px; height:84px; object-fit:cover; border:1px solid #EEE8DE; background:#F3F4F6; }
+        .upload-quality-note { background:#FDFBF7; border-left:2px solid #D4AF37; }
         .portal-mode input:checked + span { background:#7B1113; color:white; border-color:#7B1113; box-shadow:0 0 0 1px #7B1113; }
     </style>
 </head>
@@ -250,38 +257,9 @@
                 <p class="text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">Lebih dari ratusan gaun dan kebaya impian telah kami wujudkan dengan presisi dan dedikasi tinggi. Temukan inspirasi Anda melalui portofolio karya terbaik kami di bawah ini.</p>
             </div>
 
-            <!-- Galeri Portofolio -->
+            <!-- Galeri Portofolio — dikelola melalui Portal Admin -->
             <div class="max-w-7xl mx-auto px-4 py-16">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-                    <!-- Item Portofolio 1 -->
-                    <div class="group relative overflow-hidden h-96 bg-gray-200">
-                        <img src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Detail Payet Kebaya Pengantin" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-80"></div>
-                        <div class="absolute bottom-0 left-0 p-6 w-full transform translate-y-4 group-hover:translate-y-0 transition duration-500">
-                            <span class="text-gold text-[10px] uppercase tracking-widest font-bold">Kebaya Pengantin</span>
-                            <h3 class="text-white font-serif text-xl mt-1">Full Payet Eksklusif</h3>
-                        </div>
-                    </div>
-                    <!-- Item Portofolio 2 -->
-                    <div class="group relative overflow-hidden h-96 bg-gray-200">
-                        <img src="https://images.unsplash.com/photo-1610484518382-748a80d563be?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kebaya Modern Wisuda" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-80"></div>
-                        <div class="absolute bottom-0 left-0 p-6 w-full transform translate-y-4 group-hover:translate-y-0 transition duration-500">
-                            <span class="text-gold text-[10px] uppercase tracking-widest font-bold">Dress Modern</span>
-                            <h3 class="text-white font-serif text-xl mt-1">Silk Satin Velvet</h3>
-                        </div>
-                    </div>
-                    <!-- Item Portofolio 3 -->
-                    <div class="group relative overflow-hidden h-96 bg-gray-200">
-                        <img src="https://images.unsplash.com/photo-1566861298453-73130c25a07c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Kebaya Klasik" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent opacity-80"></div>
-                        <div class="absolute bottom-0 left-0 p-6 w-full transform translate-y-4 group-hover:translate-y-0 transition duration-500">
-                            <span class="text-gold text-[10px] uppercase tracking-widest font-bold">Klasik Kontemporer</span>
-                            <h3 class="text-white font-serif text-xl mt-1">Kutubaru Modern</h3>
-                        </div>
-                    </div>
-                </div>
-                
+                <div id="bespoke-portfolio-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8"></div>
                 <div class="text-center mt-16">
                     <h3 class="text-2xl font-serif text-dark mb-4">Siap Mewujudkan Gaun Impian Anda?</h3>
                     <button onclick="openCustomDressModal()" class="bg-primary text-white px-10 py-4 hover:bg-primaryDark transition shadow-lg text-sm uppercase tracking-widest font-bold border border-primary">Mulai Konsultasi Bespoke</button>
@@ -305,6 +283,7 @@
             <div class="flex overflow-x-auto mb-6 space-x-1 border-b border-gray-200">
                 <button onclick="switchAdminTab('sewa')" id="tab-sewa" class="px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap">Penyewaan</button>
                 <button onclick="switchAdminTab('custom')" id="tab-custom" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Pesanan Bespoke</button>
+                <button onclick="switchAdminTab('portfolio')" id="tab-portfolio" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Portofolio Bespoke</button>
                 <button onclick="switchAdminTab('katalog')" id="tab-katalog" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Kelola Katalog <span class="text-gold ml-1">★</span></button>
                 <button onclick="switchAdminTab('promo')" id="tab-promo" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Promo & Harga</button>
                 <button onclick="switchAdminTab('bespokeprice')" id="tab-bespokeprice" class="px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap">Harga Bespoke</button>
@@ -338,6 +317,36 @@
             <!-- BESPOKE -->
             <div id="admin-custom-container" class="hide bg-white shadow-lg border border-gray-100 overflow-x-auto rounded-b-md rounded-tr-md">
                 <table class="min-w-full"><tbody id="admin-custom-table" class="bg-white divide-y divide-gray-100"></tbody></table>
+            </div>
+
+            <!-- PORTOFOLIO BESPOKE -->
+            <div id="admin-portfolio-container" class="hide bg-white shadow-lg border border-gray-100 rounded-b-md rounded-tr-md p-6">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+                    <div>
+                        <h3 class="font-serif font-bold text-xl text-dark">Portofolio Bespoke</h3>
+                        <p class="text-xs text-gray-500 mt-1">Foto yang aktif akan muncul pada halaman Bespoke. File disimpan di Google Drive dan URL-nya dicatat pada sheet Portfolio.</p>
+                    </div>
+                    <button onclick="openPortfolioModal()" class="bg-dark text-gold px-4 py-2 hover:bg-black transition rounded-sm uppercase tracking-widest text-[10px] font-bold">+ Tambah Karya</button>
+                </div>
+                <div class="upload-quality-note p-3 mb-5 text-[10px] text-gray-600 leading-relaxed">
+                    <b>Optimasi foto:</b> browser mengecilkan sisi terpanjang maksimal 2.000 px dan mengompresi JPEG secara adaptif dengan target sekitar <b>1,4 MB</b>. 
+                    Detail kain/payet tetap tajam untuk web, tetapi halaman jauh lebih ringan dibanding mengunggah foto kamera 5–15 MB secara langsung.
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 text-gray-500">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Foto</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Karya</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Kategori</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Urutan</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-portfolio-table" class="bg-white divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- KELOLA KATALOG: form tetap mengikuti bahasa visual admin awal -->
@@ -841,6 +850,116 @@
         </div>
     </div>
 
+
+    <!-- MODAL BUKU KAS OWNER — V7.3 -->
+    <div id="modal-cashbook" class="hide fixed inset-0 z-[72] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-2xl max-h-[92vh] overflow-y-auto animate-modal-pop shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-10 px-7 py-5 border-b flex justify-between items-center">
+                <div>
+                    <span class="text-[9px] uppercase tracking-[.2em] font-bold text-gold">Owner Finance</span>
+                    <h3 id="cashbook-modal-title" class="font-serif font-bold text-xl text-primary mt-1">Catat Transaksi Kas</h3>
+                </div>
+                <button onclick="closeModal('modal-cashbook')" class="text-gray-400 hover:text-primary">X</button>
+            </div>
+            <form id="cashbook-form" onsubmit="submitCashbook(event)" class="p-7">
+                <input type="hidden" id="cashbook-id">
+                <input type="hidden" id="cashbook-proof-url">
+                <input type="hidden" id="cashbook-proof-fileid">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Tanggal *</label>
+                        <input id="cashbook-date" type="date" class="w-full border p-2 text-sm" required>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Arus Kas *</label>
+                        <select id="cashbook-direction" onchange="renderCashbookCategories()" class="w-full border p-2 text-sm">
+                            <option value="OUT">Kas Keluar</option>
+                            <option value="IN">Kas Masuk Lain</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Kategori *</label>
+                        <select id="cashbook-category" class="w-full border p-2 text-sm" required></select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Nominal *</label>
+                        <input id="cashbook-amount" type="number" min="1" class="w-full border p-2 text-sm" placeholder="0" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Keterangan *</label>
+                        <input id="cashbook-description" class="w-full border p-2 text-sm" placeholder="Contoh: Pembelian kain, pembayaran jahit Bespoke..." required>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Metode</label>
+                        <select id="cashbook-method" class="w-full border p-2 text-sm">
+                            <option>Transfer</option><option>QRIS</option><option>Cash</option><option>EDC</option><option>Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Referensi</label>
+                        <input id="cashbook-reference" class="w-full border p-2 text-sm" placeholder="Invoice / BSP / nomor nota">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Bukti / Nota</label>
+                        <input id="cashbook-proof" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="w-full border p-2 text-xs">
+                        <p class="text-[9px] text-gray-400 mt-1">Opsional. Disimpan ke Google Drive / Finance Receipts.</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Catatan</label>
+                        <textarea id="cashbook-notes" rows="3" class="w-full border p-2 text-sm"></textarea>
+                    </div>
+                </div>
+                <button class="w-full bg-primary text-white p-3 mt-6 text-xs uppercase tracking-widest font-bold">Simpan Buku Kas</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PORTOFOLIO BESPOKE -->
+    <div id="modal-portfolio" class="hide fixed inset-0 z-[71] flex items-center justify-center p-4 modal-bg">
+        <div class="bg-white w-full max-w-2xl max-h-[92vh] overflow-y-auto animate-modal-pop shadow-2xl relative">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-sm z-10 px-7 py-5 border-b flex justify-between items-center">
+                <div>
+                    <span class="text-[9px] uppercase tracking-[.2em] font-bold text-gold">Bespoke Portfolio</span>
+                    <h3 id="portfolio-modal-title" class="font-serif font-bold text-xl text-primary mt-1">Tambah Karya</h3>
+                </div>
+                <button onclick="closeModal('modal-portfolio')" class="text-gray-400 hover:text-primary">X</button>
+            </div>
+            <form id="portfolio-form" onsubmit="submitPortfolio(event)" class="p-7">
+                <input id="portfolio-id" type="hidden">
+                <input id="portfolio-fileid" type="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Judul Karya *</label>
+                        <input id="portfolio-title" class="w-full border-b border-gray-300 p-2" placeholder="Contoh: Kebaya Wisuda Full Payet" required>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Kategori</label>
+                        <input id="portfolio-category" class="w-full border-b border-gray-300 p-2" placeholder="Wisuda / Pengantin / Modern">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Urutan Tampil</label>
+                        <input id="portfolio-sort" type="number" min="1" value="10" class="w-full border-b border-gray-300 p-2">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-1">Deskripsi Singkat</label>
+                        <textarea id="portfolio-description" rows="3" class="w-full border p-2 text-sm" placeholder="Detail bahan, payet, konsep desain, dll."></textarea>
+                    </div>
+                    <div class="md:col-span-2 bg-gray-50 border p-4">
+                        <label class="block text-[10px] uppercase tracking-widest font-bold text-dark mb-2">Foto Portofolio *</label>
+                        <input id="portfolio-file" type="file" accept="image/jpeg,image/png,image/webp" class="w-full text-xs mb-3">
+                        <input id="portfolio-url" type="url" class="w-full border p-2 text-xs" placeholder="Atau URL foto lama...">
+                        <p id="portfolio-upload-status" class="text-[10px] text-primary font-bold mt-3"></p>
+                        <p class="text-[9px] text-gray-400 mt-2">Rekomendasi: foto vertikal 4:5 atau 3:4. Sistem akan menjaga sisi terpanjang maksimal 2.000 px dan menargetkan file ±1,4 MB.</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-xs"><input id="portfolio-active" type="checkbox" checked class="mr-2">Tampilkan pada halaman Bespoke</label>
+                    </div>
+                </div>
+                <button id="portfolio-submit-btn" class="w-full bg-primary text-white p-3 mt-6 text-xs uppercase tracking-widest font-bold">Simpan Portofolio</button>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL WHATSAPP PREVIEW -->
     <div id="modal-wa-preview" class="hide fixed inset-0 z-[70] flex items-center justify-center p-4 modal-bg">
         <div class="bg-white w-full max-w-xl animate-modal-pop shadow-2xl relative p-8">
@@ -953,7 +1072,7 @@
 // ================================================================
 
 // Endpoint sudah dipasangkan untuk deployment IndCollection.
-const API_URL = 'https://script.google.com/macros/s/AKfycbwXDI6F_MpI1qkrSMSsi5JoJHhzWCheaL2nppZ9Ig_kjSFj8XZnd06bUNEsZIK_LhUfQQ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwI_83IOePOY3N62tsgAVwNsAv_gZDx79dlwlHPiD8DK3oLK0v03DBqfyeH4YzRmANl1w/exec';
 const STORE_WA = '6281220007780';
 const BRAND_LOGO_DATA = 'data:image/png;base64,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';
 const BRAND_DISPLAY = 'IND COLLECTION';
@@ -966,8 +1085,8 @@ const PAYMENT_INFO = {
 const API_READY = () => API_URL && !API_URL.includes('PASTE_GOOGLE');
 const LS_KEY = 'indcollection_v4_public_cache';
 const LS_LOCAL_ORDERS = 'indcollection_v4_local_orders';
-const TOKEN_KEY = 'ic_session_v72';
-const ROLE_KEY = 'ic_role_v72';
+const TOKEN_KEY = 'ic_session_v73';
+const ROLE_KEY = 'ic_role_v73';
 
 const DEFAULT_PRODUCTS = [
     { id:'KB001', name:'Kebaya Wisuda Modern Ruby', category:'wisuda', price:175000, comparePrice:0, deposit:0, cleaningFee:0, available:true, inventoryCode:'INV-RUBY-01', size:'M/L', color:'Ruby', location:'Rak A1', condition:'Baik', lateFeePerDay:50000, description:'', images:[
@@ -988,6 +1107,7 @@ let bespokePricingData = [];
 let paymentData = [];
 let reminderData = [];
 let availabilityData = [];
+let portfolioData = [];
 let orderSortMode = 'newest';
 let ownerFinanceData = null;
 let ownerFinanceMonth = '';
@@ -1053,7 +1173,7 @@ function setRentCategories(value){
 function nowISODate(){ return localISODate(new Date()); }
 function makeLocalId(prefix){ const d=new Date(); return `${prefix}-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(Date.now()).slice(-6)}`; }
 function getToken(){ return sessionStorage.getItem(TOKEN_KEY)||''; }
-function savePublicCache(){ localStorage.setItem(LS_KEY, JSON.stringify({products:catalogData,promos:promoData,availability:availabilityData})); }
+function savePublicCache(){ localStorage.setItem(LS_KEY, JSON.stringify({products:catalogData,promos:promoData,availability:availabilityData,portfolio:portfolioData})); }
 function loadPublicCache(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch(e){ return {}; } }
 function saveLocalOrders(){ if(!API_READY()) localStorage.setItem(LS_LOCAL_ORDERS,JSON.stringify(orderData)); }
 function loadLocalOrders(){ try{return JSON.parse(localStorage.getItem(LS_LOCAL_ORDERS)||'[]');}catch(e){return[];} }
@@ -1061,7 +1181,7 @@ function loadLocalOrders(){ try{return JSON.parse(localStorage.getItem(LS_LOCAL_
 async function api(action, data={}, protectedAction=false, timeoutMs=45000, silent=false){
     if(!API_READY()) throw new Error('API_NOT_CONFIGURED');
     const loader=document.getElementById('ic-loader'),alreadyBusy=loader&&!loader.classList.contains('hide');
-    const labels={createOrder:'Menyimpan Booking',updateOrder:'Memperbarui Pesanan',addPayment:'Menyimpan Pembayaran',upsertProduct:'Menyimpan Katalog',deleteProduct:'Menghapus Katalog',upsertPromo:'Menyimpan Promo',deletePromo:'Menghapus Promo',createBespoke:'Mengirim Bespoke',updateBespoke:'Memperbarui Bespoke',upsertBespokePrice:'Menyimpan Harga',deleteBespokePrice:'Menghapus Harga',uploadFile:'Mengunggah File',refreshReminders:'Memperbarui Reminder',markReminderSent:'Memperbarui Reminder',customerHistory:'Memuat Riwayat',adminData:'Sinkronisasi Data',financeData:'Memuat Laporan Keuangan',upsertCashbook:'Menyimpan Buku Kas',deleteCashbook:'Menghapus Buku Kas'};
+    const labels={createOrder:'Menyimpan Booking',updateOrder:'Memperbarui Pesanan',addPayment:'Menyimpan Pembayaran',upsertProduct:'Menyimpan Katalog',deleteProduct:'Menghapus Katalog',upsertPromo:'Menyimpan Promo',deletePromo:'Menghapus Promo',createBespoke:'Mengirim Bespoke',updateBespoke:'Memperbarui Bespoke',upsertBespokePrice:'Menyimpan Harga',deleteBespokePrice:'Menghapus Harga',uploadFile:'Mengunggah File',refreshReminders:'Memperbarui Reminder',markReminderSent:'Memperbarui Reminder',customerHistory:'Memuat Riwayat',adminData:'Sinkronisasi Data',financeData:'Memuat Laporan Keuangan',upsertCashbook:'Menyimpan Buku Kas',deleteCashbook:'Menghapus Buku Kas',upsertPortfolio:'Menyimpan Portofolio',deletePortfolio:'Menghapus Portofolio'};
     if(!silent && !alreadyBusy && action!=='bootstrap' && action!=='session')showProcessLoader(labels[action]||'Memproses','Menghubungkan ke sistem IndCollection...',18);
     const payload={action,data,token:protectedAction?getToken():''};
     const body=new URLSearchParams({payload:JSON.stringify(payload)});
@@ -1085,6 +1205,7 @@ async function bootstrap(){
     catalogData = cache.products?.length ? cache.products : [...DEFAULT_PRODUCTS];
     promoData = cache.promos || [];
     availabilityData = cache.availability || [];
+    portfolioData = cache.portfolio || [];
     orderData = loadLocalOrders();
     if(API_READY()){
         try{
@@ -1092,10 +1213,12 @@ async function bootstrap(){
             catalogData = out.products || catalogData;
             promoData = out.promos || [];
             availabilityData = out.availability || [];
+            portfolioData = out.portfolio || portfolioData;
             savePublicCache();
         }catch(err){ console.warn('Bootstrap API gagal, cache lokal dipakai:',err.message); }
     }
     renderCatalog(activeCatalogFilter);
+    renderBespokePortfolio();
     updateClock();
 }
 
@@ -1105,6 +1228,7 @@ function navigate(viewId){
     document.getElementById(`view-${viewId}`)?.classList.remove('hide');
     window.scrollTo({top:0,behavior:'smooth'});
     if(viewId==='catalog') renderCatalog(activeCatalogFilter);
+    if(viewId==='bespoke') renderBespokePortfolio();
 }
 function openModal(id){ document.getElementById(id)?.classList.remove('hide'); document.body.style.overflow='hidden'; }
 function closeModal(id){ document.getElementById(id)?.classList.add('hide'); document.body.style.overflow='auto'; }
@@ -1278,18 +1402,29 @@ function buildBookingWA(o){
 }
 
 // ---------- FULLSCREEN GALLERY ----------
+let galleryEntries = [];
 function openGallery(itemId,index=0){
     const item=catalogData.find(x=>x.id===itemId);if(!item||!item.images?.length)return;
-    galleryItemId=itemId;galleryIndex=Math.max(0,Math.min(Number(index)||0,item.images.length-1));galleryScale=1;
-    document.getElementById('gallery-title').textContent=item.name;openModal('modal-gallery');renderGallery();
+    galleryEntries=item.images.map((src,i)=>({src,title:item.name,subtitle:`Foto ${i+1} dari ${item.images.length}`}));
+    galleryItemId=itemId;galleryIndex=Math.max(0,Math.min(Number(index)||0,galleryEntries.length-1));galleryScale=1;
+    openModal('modal-gallery');renderGallery();
+}
+function openPortfolioGallery(id){
+    const list=sortedPortfolio(true);if(!list.length)return;
+    const idx=Math.max(0,list.findIndex(x=>x.id===id));
+    galleryEntries=list.map((p,i)=>({src:p.imageUrl,title:p.title||'Portofolio Ind Collection',subtitle:`${p.category||'Bespoke'} · ${i+1}/${list.length}`}));
+    galleryItemId='portfolio';galleryIndex=idx;galleryScale=1;openModal('modal-gallery');renderGallery();
 }
 function renderGallery(){
-    const item=catalogData.find(x=>x.id===galleryItemId);if(!item)return;
-    const img=document.getElementById('gallery-image');img.src=item.images[galleryIndex];img.style.transform=`scale(${galleryScale})`;
-    document.getElementById('gallery-counter').textContent=`Foto ${galleryIndex+1} dari ${item.images.length}`;
-    document.getElementById('gallery-prev').classList.toggle('hide',item.images.length<2);document.getElementById('gallery-next').classList.toggle('hide',item.images.length<2);
+    if(!galleryEntries.length)return;
+    const e=galleryEntries[galleryIndex],img=document.getElementById('gallery-image');
+    img.src=e.src;img.style.transform=`scale(${galleryScale})`;
+    document.getElementById('gallery-title').textContent=e.title||'IND COLLECTION';
+    document.getElementById('gallery-counter').textContent=e.subtitle||`Foto ${galleryIndex+1} dari ${galleryEntries.length}`;
+    document.getElementById('gallery-prev').classList.toggle('hide',galleryEntries.length<2);
+    document.getElementById('gallery-next').classList.toggle('hide',galleryEntries.length<2);
 }
-function galleryMove(dir){const item=catalogData.find(x=>x.id===galleryItemId);if(!item||item.images.length<2)return;galleryIndex=(galleryIndex+dir+item.images.length)%item.images.length;galleryScale=1;renderGallery();}
+function galleryMove(dir){if(galleryEntries.length<2)return;galleryIndex=(galleryIndex+dir+galleryEntries.length)%galleryEntries.length;galleryScale=1;renderGallery();}
 function galleryZoom(delta){galleryScale=Math.max(.5,Math.min(3,galleryScale+delta));renderGallery();}
 function galleryResetZoom(){galleryScale=1;renderGallery();}
 function galleryWheel(e){e.preventDefault();galleryZoom(e.deltaY<0?.2:-.2);}
@@ -1347,7 +1482,7 @@ async function enterWorkspace(ev){
     try{
         const month=localISODate(new Date()).slice(0,7),out=await api('session',{k,month},false,50000);
         sessionStorage.setItem(TOKEN_KEY,out.token);sessionStorage.setItem(ROLE_KEY,out.role||'ops');
-        catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
+        catalogData=out.products||catalogData;orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||promoData;bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];portfolioData=out.portfolio||portfolioData;
         if((out.role||'ops')==='owner'){ownerFinanceData=out.finance||null;ownerFinanceMonth=ownerFinanceData?.month||month;}else{ownerFinanceData=null;ownerFinanceMonth='';}
         savePublicCache();closeModal('modal-access');navigate('admin-dashboard');renderAdminAll();renderCatalog(activeCatalogFilter);applyPortalRoleUI();switchAdminTab('sewa');
         updateProcessLoader((out.role||'ops')==='owner'?'Portal Owner Siap':'Portal Admin Siap',(out.role||'ops')==='owner'?'Akses penuh operasional dan keuangan berhasil dimuat.':'Data operasional berhasil dimuat.',100);
@@ -1360,13 +1495,13 @@ async function refreshAdminData(silent=false){
     if(!getToken())return;
     try{
         const out=await api('adminData',{},true,45000,silent);
-        catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];
-        savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);applyPortalRoleUI();
+        catalogData=out.products||[];orderData=out.orders||[];customOrderData=out.bespoke||[];promoData=out.promos||[];bespokePricingData=out.bespokePricing||[];paymentData=out.payments||[];reminderData=out.reminders||[];availabilityData=out.availability||[];portfolioData=out.portfolio||portfolioData;
+        savePublicCache();renderAdminAll();renderCatalog(activeCatalogFilter);renderBespokePortfolio();applyPortalRoleUI();
     }catch(e){if(['AUTH_EXPIRED','AUTH_INVALID','AUTH_REQUIRED','ROLE_DENIED'].includes(e.message)){logoutPortal();alert('Sesi portal berakhir. Silakan masuk kembali.');}else console.error(e);}
 }
-function renderAdminAll(){renderAdminOrders();renderAdminCustom();renderAdminKatalog();renderAdminPromo();renderAdminBespokePricing();renderCalendar();renderReminders();}
+function renderAdminAll(){renderAdminOrders();renderAdminCustom();renderAdminPortfolio();renderAdminKatalog();renderAdminPromo();renderAdminBespokePricing();renderCalendar();renderReminders();}
 function switchAdminTab(tab){
-    ['sewa','custom','katalog','promo','bespokeprice','calendar','reminder'].forEach(t=>{const btn=document.getElementById(`tab-${t}`),cont=document.getElementById(`admin-${t}-container`);if(!btn||!cont)return;if(t===tab){btn.className='px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap';cont.classList.remove('hide');}else{btn.className='px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap';cont.classList.add('hide');}});
+    ['sewa','custom','portfolio','katalog','promo','bespokeprice','calendar','reminder'].forEach(t=>{const btn=document.getElementById(`tab-${t}`),cont=document.getElementById(`admin-${t}-container`);if(!btn||!cont)return;if(t===tab){btn.className='px-6 py-3 bg-primary text-white font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md whitespace-nowrap';cont.classList.remove('hide');}else{btn.className='px-6 py-3 bg-gray-200 text-gray-600 hover:bg-gray-300 font-bold uppercase tracking-wide text-xs md:text-sm rounded-t-md transition-colors whitespace-nowrap';cont.classList.add('hide');}});
     if(tab==='calendar')renderCalendar();if(tab==='reminder')renderReminders();
 }
 function openOwnerFinance(){
@@ -1744,12 +1879,158 @@ async function submitManageItem(e){
 }
 async function deleteItem(id){if(!confirm('PERINGATAN: Hapus item ini dari katalog?'))return;showProcessLoader('Menghapus Item','Memperbarui database...',30);try{await api('deleteProduct',{id},true);catalogData=catalogData.filter(i=>i.id!==id);savePublicCache();renderAdminKatalog();renderCatalog(activeCatalogFilter);updateProcessLoader('Selesai','Item sudah dihapus.',100);await new Promise(r=>setTimeout(r,150));}catch(err){alert('Gagal menghapus: '+err.message);}finally{hideProcessLoader();}}
 async function syncSheetNow(){const btn=document.getElementById('sync-sheet-btn');if(btn)btn.disabled=true;showProcessLoader('Sinkronisasi','Mengambil data terbaru dari spreadsheet...',20);try{await refreshAdminData();updateProcessLoader('Sinkronisasi Selesai','Dashboard dan frontend sudah diperbarui.',100);await new Promise(r=>setTimeout(r,160));hideProcessLoader();showSuccessAlert('Sinkronisasi Selesai','Data terbaru dari Google Sheet sudah dimuat ke dashboard dan frontend.',`<button onclick="closeModal('modal-success')" class="w-full bg-dark text-gold p-3 uppercase font-bold text-xs">Tutup</button>`);}catch(err){hideProcessLoader();alert('Sinkronisasi gagal: '+err.message);}finally{if(btn)btn.disabled=false;}}
+
+function readFileAsDataURL(fileOrBlob){
+    return new Promise((resolve,reject)=>{
+        const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('FILE_READ_ERROR'));r.readAsDataURL(fileOrBlob);
+    });
+}
+async function loadImageSource(file){
+    if('createImageBitmap' in window){
+        try{return await createImageBitmap(file);}catch(e){}
+    }
+    const url=URL.createObjectURL(file);
+    try{
+        const img=new Image();
+        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+        return img;
+    }finally{setTimeout(()=>URL.revokeObjectURL(url),1000);}
+}
+function canvasBlob(canvas,type='image/jpeg',quality=.86){
+    return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('IMAGE_ENCODE_FAILED')),type,quality));
+}
+async function compressImageFile(file){
+    const source=await loadImageSource(file);
+    const sw=source.width||source.naturalWidth,sh=source.height||source.naturalHeight;
+    if(!sw||!sh)throw new Error('IMAGE_DIMENSION_INVALID');
+    const MAX_EDGE=2000,TARGET=1.4*1024*1024,MIN_Q=.68;
+    let scale=Math.min(1,MAX_EDGE/Math.max(sw,sh)),quality=.88,blob=null;
+    for(let round=0;round<4;round++){
+        const w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
+        const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d',{alpha:false});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+        ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(source,0,0,w,h);
+        for(const q of [quality,.84,.80,.76,.72,MIN_Q]){
+            blob=await canvasBlob(canvas,'image/jpeg',q);
+            if(blob.size<=TARGET){quality=q;break;}
+        }
+        if(blob.size<=TARGET||scale<=.58)break;
+        scale*=.86;
+    }
+    if(source.close)try{source.close();}catch(e){}
+    const data=await readFileAsDataURL(blob);
+    const base=(file.name||'image').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'-');
+    return {
+        base64:String(data).split(',')[1],
+        mimeType:'image/jpeg',
+        fileName:(base||'image')+'.jpg',
+        originalBytes:file.size||0,
+        optimizedBytes:blob.size||0
+    };
+}
+
 async function prepareUpload(file){
     if(file.type.startsWith('image/'))return compressImageFile(file);
     const data=await readFileAsDataURL(file);return {base64:data.split(',')[1],mimeType:file.type||'application/octet-stream',fileName:file.name};
 }
 async function uploadAdminFile(file,category,prefix='file'){
     const prepared=await prepareUpload(file);prepared.fileName=`${prefix}-${Date.now()}-${prepared.fileName}`;prepared.category=category;const out=await api('uploadFile',prepared,true);return out.file;
+}
+
+
+// ---------- BESPOKE PORTFOLIO V7.3 ----------
+function sortedPortfolio(activeOnly=false){
+    return [...portfolioData].filter(x=>!activeOnly||x.active!==false)
+        .sort((a,b)=>Number(a.sortOrder||999)-Number(b.sortOrder||999)||String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+}
+function renderBespokePortfolio(){
+    const grid=document.getElementById('bespoke-portfolio-grid');if(!grid)return;
+    const rows=sortedPortfolio(true);
+    if(!rows.length){
+        grid.innerHTML=`<div class="md:col-span-3 border border-gray-200 bg-white p-10 text-center"><span class="text-gold text-[10px] uppercase tracking-[.2em] font-bold">Portfolio Update</span><h3 class="font-serif text-xl mt-2 text-dark">Koleksi karya sedang diperbarui</h3><p class="text-xs text-gray-500 mt-2">Hubungi Ind Collection untuk melihat referensi karya terbaru dan konsultasi desain.</p></div>`;
+        return;
+    }
+    grid.innerHTML=rows.map(p=>`<article class="portfolio-card group" onclick="openPortfolioGallery('${p.id}')">
+        <img src="${escapeHtml(p.imageUrl||'')}" alt="${escapeHtml(p.title||'Portofolio Ind Collection')}" class="absolute inset-0 w-full h-full object-cover" loading="lazy" onerror="this.style.opacity='.15'">
+        <div class="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/15 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 p-6 w-full">
+            <span class="text-gold text-[9px] uppercase tracking-[.18em] font-bold">${escapeHtml(p.category||'Bespoke')}</span>
+            <h3 class="text-white font-serif text-xl mt-1">${escapeHtml(p.title||'Karya Ind Collection')}</h3>
+            ${p.description?`<p class="text-gray-300 text-[10px] mt-2 leading-relaxed opacity-0 group-hover:opacity-100 transition">${escapeHtml(p.description)}</p>`:''}
+        </div>
+    </article>`).join('');
+}
+function renderAdminPortfolio(){
+    const tb=document.getElementById('admin-portfolio-table');if(!tb)return;
+    const rows=sortedPortfolio(false);
+    if(!rows.length){tb.innerHTML='<tr><td colspan="6" class="p-8 text-center text-gray-400 text-xs">Belum ada foto portofolio. Klik “Tambah Karya”.</td></tr>';return;}
+    tb.innerHTML=rows.map(p=>`<tr class="hover:bg-gray-50 border-b">
+        <td class="p-3"><img src="${escapeHtml(p.imageUrl||'')}" class="portfolio-admin-thumb" onerror="this.style.opacity='.2'"></td>
+        <td class="p-3"><b class="text-xs">${escapeHtml(p.title||'-')}</b><div class="text-[9px] text-gray-400 mt-1">${escapeHtml(p.description||'')}</div></td>
+        <td class="p-3 text-[10px] uppercase tracking-wider">${escapeHtml(p.category||'Bespoke')}</td>
+        <td class="p-3 text-xs font-bold">${Number(p.sortOrder||0)}</td>
+        <td class="p-3"><span class="${p.active!==false?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'} px-2 py-1 text-[9px] uppercase font-bold">${p.active!==false?'Tampil':'Disembunyikan'}</span></td>
+        <td class="p-3"><div class="flex flex-col gap-1 w-max">
+            <button onclick="openPortfolioModal('${p.id}')" class="bg-dark text-gold px-2 py-1 text-[9px] uppercase font-bold">Edit</button>
+            <button onclick="openPortfolioGallery('${p.id}')" class="border border-gray-400 px-2 py-1 text-[9px] uppercase font-bold">Lihat</button>
+            <button onclick="deletePortfolio('${p.id}')" class="border border-primary text-primary px-2 py-1 text-[9px] uppercase font-bold">Hapus</button>
+        </div></td>
+    </tr>`).join('');
+}
+function openPortfolioModal(id=''){
+    const form=document.getElementById('portfolio-form');form.reset();
+    document.getElementById('portfolio-id').value='';document.getElementById('portfolio-fileid').value='';
+    document.getElementById('portfolio-sort').value=10;document.getElementById('portfolio-active').checked=true;
+    document.getElementById('portfolio-upload-status').textContent='';
+    const p=portfolioData.find(x=>x.id===id);
+    if(p){
+        document.getElementById('portfolio-modal-title').textContent='Edit Karya';
+        document.getElementById('portfolio-id').value=p.id;document.getElementById('portfolio-fileid').value=p.imageFileId||'';
+        document.getElementById('portfolio-title').value=p.title||'';document.getElementById('portfolio-category').value=p.category||'';
+        document.getElementById('portfolio-description').value=p.description||'';document.getElementById('portfolio-url').value=p.imageUrl||'';
+        document.getElementById('portfolio-sort').value=Number(p.sortOrder||10);document.getElementById('portfolio-active').checked=p.active!==false;
+    }else document.getElementById('portfolio-modal-title').textContent='Tambah Karya';
+    openModal('modal-portfolio');
+}
+async function submitPortfolio(e){
+    e.preventDefault();
+    const btn=document.getElementById('portfolio-submit-btn'),status=document.getElementById('portfolio-upload-status');
+    btn.disabled=true;btn.classList.add('opacity-50');
+    showProcessLoader('Menyimpan Portofolio','Menyiapkan foto karya...',10);
+    try{
+        let imageUrl=document.getElementById('portfolio-url').value.trim(),imageFileId=document.getElementById('portfolio-fileid').value;
+        const file=document.getElementById('portfolio-file').files[0];
+        if(file){
+            updateProcessLoader('Optimasi & Upload Foto','Menjaga detail tetap tajam sambil memperkecil ukuran file...',35);
+            status.textContent='Mengoptimalkan foto dan mengunggah ke Google Drive...';
+            const up=await uploadAdminFile(file,'portfolio','Portfolio');
+            imageUrl=up.url;imageFileId=up.fileId;
+        }
+        if(!imageUrl)throw new Error('Foto portofolio wajib diisi.');
+        updateProcessLoader('Menyimpan Database','Menulis data ke sheet Portfolio...',78);
+        const payload={
+            id:document.getElementById('portfolio-id').value,
+            title:document.getElementById('portfolio-title').value.trim(),
+            category:document.getElementById('portfolio-category').value.trim(),
+            description:document.getElementById('portfolio-description').value.trim(),
+            imageUrl,imageFileId,
+            sortOrder:Number(document.getElementById('portfolio-sort').value||10),
+            active:document.getElementById('portfolio-active').checked
+        };
+        const out=await api('upsertPortfolio',payload,true,50000,true),saved=out.portfolio;
+        const idx=portfolioData.findIndex(x=>x.id===saved.id);if(idx>=0)portfolioData[idx]=saved;else portfolioData.push(saved);
+        savePublicCache();renderAdminPortfolio();renderBespokePortfolio();closeModal('modal-portfolio');
+        updateProcessLoader('Portofolio Diperbarui','Foto sudah tersimpan di Google Drive dan tampil di frontend.',100);
+        await new Promise(r=>setTimeout(r,140));
+    }catch(err){alert('Gagal menyimpan portofolio: '+err.message);}
+    finally{hideProcessLoader();btn.disabled=false;btn.classList.remove('opacity-50');status.textContent='';}
+}
+async function deletePortfolio(id){
+    if(!confirm('Hapus karya ini dari daftar portofolio? File Google Drive tidak dihapus otomatis agar tetap ada sebagai arsip.'))return;
+    showProcessLoader('Menghapus Portofolio','Memperbarui sheet Portfolio...',30);
+    try{await api('deletePortfolio',{id},true,45000,true);portfolioData=portfolioData.filter(x=>x.id!==id);savePublicCache();renderAdminPortfolio();renderBespokePortfolio();updateProcessLoader('Selesai','Item portofolio sudah dihapus dari website.',100);await new Promise(r=>setTimeout(r,120));}
+    catch(err){alert('Gagal menghapus portofolio: '+err.message);}
+    finally{hideProcessLoader();}
 }
 
 // ---------- ADMIN PROMO ----------
